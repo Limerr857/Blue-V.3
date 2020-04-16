@@ -12,8 +12,15 @@ pygame.init()
 win = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
 pygame.display.set_caption("Blue V.3 Editor")
 clock = pygame.time.Clock()
+fontbasic = pygame.font.SysFont('Calibri', 30)
 
 menu_page = 1
+menu_slots = ((10,15),(10,62),(10,109),(10,156),(10,203),(10,250),(10,297),(10,344),(10,391),(10,438),(10,485),(10,532),(10,579),(10,626),(10,673),(10,720),(10,767),(10,814),(10,861),(10,908),(10,955))
+
+menu_pages_img = img.load("img_editor/menu_pages.png").convert_alpha()
+
+scroll_tracker = (0,0)
+scroll_vel = 5
 
 object_list = [
 
@@ -22,6 +29,15 @@ object_list = [
               ]
 
 current_map = []
+
+# Adds tuples, stolen from here: https://stackoverflow.com/questions/5607284/how-to-add-with-tuples
+# USE LIKE THIS:
+# tupleadd((1,0),foo(a-b,b))
+def tupleadd(x,y):
+    z = []
+    for i in range(len(x)):
+        z.append(x[i]+y[i])
+    return tuple(z)
 
 class _object(pygame.sprite.Sprite):
 
@@ -43,15 +59,37 @@ class Cobblestone(_object):
         self.setup()
         self.rect = self.image.get_rect()
 
+cobblestone_menu = _object(0, menu_slots[0])
+cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
+
 
 def updates_and_draw():
+    global scroll_tracker
+
+    win.fill((0,0,0))
     
-    # Update and draw menu
+    # Update and draw menu sidebar
     if menu_page == 1:
-        import os
-        print(os.getcwd())
-        cbbl = img.load("cobble.png").convert()
-        win.blit(cbbl, (10, 10))
+        # Blitting cobblestone and text besides it
+        win.blit(cobblestone_menu.image, cobblestone_menu.location)
+        win.blit(cobblestone_txt, tupleadd(cobblestone_menu.location, (40, 2)))
+
+    if keys[pygame.K_UP]:
+        scroll_tracker = tupleadd(scroll_tracker,(0,scroll_vel))
+    if keys[pygame.K_DOWN]:
+        scroll_tracker = tupleadd(scroll_tracker,(0,-scroll_vel))
+    if keys[pygame.K_LEFT]:
+        scroll_tracker = tupleadd(scroll_tracker,(scroll_vel,0))
+    if keys[pygame.K_RIGHT]:
+        scroll_tracker = tupleadd(scroll_tracker,(-scroll_vel,0))
+    
+    win.blit(cobblestone_menu.image, tupleadd(scroll_tracker,(500,500)))
+
+                    
+
+
+        
+
         
 
    
