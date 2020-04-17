@@ -28,11 +28,17 @@ temp = 0
 
 object_list = [
 
-              "img/cobble.png"
+              "img/cobble.png", "img_editor/empty.png"
 
               ]
 
 current_map = []
+current_map_size = [10,10]
+
+# Takes the current map size and fills in current_map based on it
+for i in range(current_map_size[0]*current_map_size[1]):
+    current_map.append("1")
+print(current_map)
 
 # Adds tuples, stolen from here: https://stackoverflow.com/questions/5607284/how-to-add-with-tuples
 # USE LIKE THIS:
@@ -52,16 +58,25 @@ class _object(pygame.sprite.Sprite):
         if type == 0:
             # Cobblestone
             Cobblestone.__init__(self)
+        elif type == 1:
+            # Empty
+            empty.__init__(self)
 
     def setup(self):
         self.size = self.image.get_rect().size
         self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
 
 class Cobblestone(_object):
     def __init__(self):
         self.image = img.load(object_list[0]).convert_alpha()
         self.setup()
-        self.rect = self.image.get_rect()
+
+class empty(_object):
+    def __init__(self):
+        self.image = img.load(object_list[1]).convert_alpha()
+        self.setup()
+        
 
 cobblestone_menu = _object(0, menu_slots[0])
 cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
@@ -75,6 +90,21 @@ def updates_and_draw():
     global mouse_1
 
     win.fill((0,0,0))
+    win.blit(menu_sidebar_img, (-5,-5))
+
+    # Insert editor tiles
+    temp = 0
+    for obj in current_map:
+        if current_map_size[0] > temp:
+            tempx = temp*32+scroll_tracker[0]+250
+            tempy = scroll_tracker[1]
+        else:
+            tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
+            tempy = int(temp/current_map_size[0])*32
+        
+        exec("object_{} = _object({},({},{}))".format(temp, obj, tempx, tempy))
+        exec("win.blit(object_{}.image, object_{}.location)".format(temp, temp))
+        temp+=1
     
     # Update and draw menu sidebar
     if menu_page == 1:
@@ -101,8 +131,19 @@ def updates_and_draw():
             if slot[0] <= mouse_x <= (slot[0]+232) and slot[1] <= mouse_y <= (slot[1]+32):
                 selected = temp
             temp+=1
-        
-        
+
+        # if click is inside editing area
+        if 250 < mouse_x:
+            # Tricky code that figures out which "slot" you have clicked
+            temp1 = int(mouse_x-250-scroll_tracker[1]/32)
+            temp2 = int(mouse_y-scroll_tracker[0]/32)
+            print(temp2*current_map_size[0]+temp1)
+            print(temp1)
+            print(temp2)
+            current_map[temp2*current_map_size[0]+temp1] = selected
+
+
+    
 
 
 
