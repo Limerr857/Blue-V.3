@@ -18,9 +18,13 @@ menu_page = 1
 menu_slots = ((10,15),(10,62),(10,109),(10,156),(10,203),(10,250),(10,297),(10,344),(10,391),(10,438),(10,485),(10,532),(10,579),(10,626),(10,673),(10,720),(10,767),(10,814),(10,861),(10,908),(10,955))
 
 menu_pages_img = img.load("img_editor/menu_pages.png").convert_alpha()
+menu_sidebar_img = img.load("img_editor/menu_sidebar.png").convert_alpha()
 
 scroll_tracker = (0,0)
 scroll_vel = 5
+selected = 0
+
+temp = 0
 
 object_list = [
 
@@ -62,9 +66,13 @@ class Cobblestone(_object):
 cobblestone_menu = _object(0, menu_slots[0])
 cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
 
-
 def updates_and_draw():
     global scroll_tracker
+    global mouse_x
+    global mouse_y
+    global selected
+    global temp
+    global mouse_1
 
     win.fill((0,0,0))
     
@@ -83,7 +91,20 @@ def updates_and_draw():
     if keys[pygame.K_RIGHT]:
         scroll_tracker = tupleadd(scroll_tracker,(-scroll_vel,0))
     
-    win.blit(cobblestone_menu.image, tupleadd(scroll_tracker,(500,500)))
+    # FORMAT: win.blit(cobblestone_menu.image, tupleadd(scroll_tracker,(500,500)))
+
+    mouse_1, mouse_2, mouse_3 = pygame.mouse.get_pressed()
+    if mouse_1:
+        temp = 0
+        for slot in menu_slots:
+            # if click is inside of slot
+            if slot[0] <= mouse_x <= (slot[0]+232) and slot[1] <= mouse_y <= (slot[1]+32):
+                selected = temp
+            temp+=1
+        
+        
+
+
 
                     
 
@@ -98,7 +119,8 @@ def updates_and_draw():
 run = True
 while run:
     clock.tick(60)
-    x, y = pygame.mouse.get_pos()
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    mouse_1 = False
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -107,6 +129,8 @@ while run:
     # TODO: replace with actual menu
     if keys[pygame.K_ESCAPE]:
         run = False
+    
+    
 
     updates_and_draw()
     pygame.display.update()
