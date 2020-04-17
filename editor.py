@@ -77,9 +77,11 @@ class empty(_object):
         self.image = img.load(object_list[1]).convert_alpha()
         self.setup()
         
-
+# ADDNEW
 cobblestone_menu = _object(0, menu_slots[0])
 cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
+empty_menu = _object(1, menu_slots[1])
+empty_txt = fontbasic.render('Empty', True, (255, 255, 255))
 
 def updates_and_draw():
     global scroll_tracker
@@ -90,7 +92,6 @@ def updates_and_draw():
     global mouse_1
 
     win.fill((0,0,0))
-    win.blit(menu_sidebar_img, (-5,-5))
 
     # Insert editor tiles
     temp = 0
@@ -100,17 +101,21 @@ def updates_and_draw():
             tempy = scroll_tracker[1]
         else:
             tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
-            tempy = int(temp/current_map_size[0])*32
+            tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
         
         exec("object_{} = _object({},({},{}))".format(temp, obj, tempx, tempy))
         exec("win.blit(object_{}.image, object_{}.location)".format(temp, temp))
         temp+=1
     
     # Update and draw menu sidebar
+    win.blit(menu_sidebar_img, (-5,-5))
     if menu_page == 1:
         # Blitting cobblestone and text besides it
+        # ADDNEW
         win.blit(cobblestone_menu.image, cobblestone_menu.location)
         win.blit(cobblestone_txt, tupleadd(cobblestone_menu.location, (40, 2)))
+        win.blit(empty_menu.image, empty_menu.location)
+        win.blit(empty_txt, tupleadd(empty_menu.location, (40, 2)))
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker,(0,scroll_vel))
@@ -135,27 +140,12 @@ def updates_and_draw():
         # if click is inside editing area
         if 250 < mouse_x:
             # Tricky code that figures out which "slot" you have clicked
-            temp1 = int(mouse_x-250-scroll_tracker[1]/32)
-            temp2 = int(mouse_y-scroll_tracker[0]/32)
-            print(temp2*current_map_size[0]+temp1)
-            print(temp1)
-            print(temp2)
-            current_map[temp2*current_map_size[0]+temp1] = selected
-
-
-    
-
-
-
-                    
-
-
-        
-
-        
-
-   
-
+            temp1 = int((mouse_x-250-scroll_tracker[0])/32)
+            temp2 = int((mouse_y-scroll_tracker[1])/32)
+            try:
+                current_map[temp2*current_map_size[0]+temp1] = selected
+            except:
+                print("User clicked outside of editor area")
 
 run = True
 while run:
