@@ -1,10 +1,8 @@
 
 import pygame
 from pygame import image as img
-import time
-import math
-import random
 import pickle
+import random
 
 pygame.mixer.pre_init(44100, 16, 2, 4096)
 pygame.init()
@@ -55,6 +53,23 @@ def tupleadd(x,y):
     for i in range(len(x)):
         z.append(x[i]+y[i])
     return tuple(z)
+
+# Saves the current map to editor_saves
+def savemap():
+    global current_map
+    global current_map_size
+    f = open("editor_saves/save.txt","wb+")
+    pickle.dump((current_map_size,current_map),f)
+    f.close()
+
+def loadmap():
+    global current_map
+    global current_map_size
+    global new_object
+    f = open("editor_saves/save.txt","rb")
+    current_map_size, current_map = pickle.load(f)
+    f.close()
+    new_object = True
 
 class _object(pygame.sprite.Sprite):
 
@@ -216,8 +231,12 @@ while run:
     
     if keys[pygame.K_c] and keys[pygame.K_LSHIFT]:
         reloadmap()
-
     
+    if keys[pygame.K_s] and keys[pygame.K_LSHIFT]:
+        savemap()
+    
+    if keys[pygame.K_l] and keys[pygame.K_LSHIFT]:
+        loadmap()
     
 
     updates_and_draw()
