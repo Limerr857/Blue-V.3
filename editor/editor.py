@@ -29,7 +29,7 @@ temp = 0
 
 object_list = [
 
-              "img/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png"
+              "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png"
 
               ]
 
