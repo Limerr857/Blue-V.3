@@ -21,8 +21,9 @@ menu_pages_img = img.load("img_editor/menu_pages.png").convert_alpha()
 menu_sidebar_img = img.load("img_editor/menu_sidebar.png").convert_alpha()
 
 scroll_tracker = (0,0)
-scroll_vel = 5
+scroll_vel = 7
 selected = 0
+new_object = True
 
 temp = 0
 
@@ -33,12 +34,12 @@ object_list = [
               ]
 
 current_map = []
-current_map_size = [10,10]
+current_map_size = [50,20]
 
 # Takes the current map size and fills in current_map based on it
 for i in range(current_map_size[0]*current_map_size[1]):
     current_map.append("1")
-print(current_map)
+
 
 # Adds tuples, stolen from here: https://stackoverflow.com/questions/5607284/how-to-add-with-tuples
 # USE LIKE THIS:
@@ -83,6 +84,11 @@ cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
 empty_menu = _object(1, menu_slots[1])
 empty_txt = fontbasic.render('Empty', True, (255, 255, 255))
 
+# ADDNEW
+# Each object is represented by their _object.type value
+object_0 = _object(0, (0,0))
+object_1 = _object(1, (0,0))
+
 def updates_and_draw():
     global scroll_tracker
     global mouse_x
@@ -90,10 +96,27 @@ def updates_and_draw():
     global selected
     global temp
     global mouse_1
+    global new_object
 
     win.fill((0,0,0))
 
     # Insert editor tiles
+    if new_object:
+        temp = 0
+        for obj in current_map:
+            if current_map_size[0] > temp:
+                tempx = temp*32+scroll_tracker[0]+250
+                tempy = scroll_tracker[1]
+            else:
+                tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
+                tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
+
+            try:
+                exec("win.blit(object_{}.image, ({},{}))".format(obj, tempx, tempy), globals())
+            except NameError:
+                print("User has probably selected non-existant block from sidebar")
+            temp+=1
+        new_object = False
     temp = 0
     for obj in current_map:
         if current_map_size[0] > temp:
@@ -102,10 +125,12 @@ def updates_and_draw():
         else:
             tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
             tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
-        
-        exec("object_{} = _object({},({},{}))".format(temp, obj, tempx, tempy))
-        exec("win.blit(object_{}.image, object_{}.location)".format(temp, temp))
+        try:
+            exec("win.blit(object_{}.image, ({},{}))".format(obj, tempx, tempy), globals())
+        except NameError:
+            print("User has probably selected non-existant block from sidebar")
         temp+=1
+
     
     # Update and draw menu sidebar
     win.blit(menu_sidebar_img, (-5,-5))
@@ -119,12 +144,17 @@ def updates_and_draw():
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker,(0,scroll_vel))
+        new_object = True
     if keys[pygame.K_DOWN]:
         scroll_tracker = tupleadd(scroll_tracker,(0,-scroll_vel))
+        new_object = True
     if keys[pygame.K_LEFT]:
         scroll_tracker = tupleadd(scroll_tracker,(scroll_vel,0))
+        new_object = True
     if keys[pygame.K_RIGHT]:
         scroll_tracker = tupleadd(scroll_tracker,(-scroll_vel,0))
+        new_object = True
+
     
     # FORMAT: win.blit(cobblestone_menu.image, tupleadd(scroll_tracker,(500,500)))
 
@@ -144,6 +174,7 @@ def updates_and_draw():
             temp2 = int((mouse_y-scroll_tracker[1])/32)
             try:
                 current_map[temp2*current_map_size[0]+temp1] = selected
+                new_object = True
             except:
                 print("User clicked outside of editor area")
 
