@@ -29,7 +29,7 @@ temp = 0
 
 object_list = [
 
-              "img/cobble.png", "img_editor/empty.png"
+              "img/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png"
 
               ]
 
@@ -71,6 +71,7 @@ def loadmap():
     f.close()
     new_object = True
 
+# ADDNEW
 class _object(pygame.sprite.Sprite):
 
     def __init__(self, type, location):
@@ -83,6 +84,9 @@ class _object(pygame.sprite.Sprite):
         elif type == 1:
             # Empty
             empty.__init__(self)
+        elif type == 2:
+            dirt_1.__init__(self)
+
 
     def setup(self):
         self.size = self.image.get_rect().size
@@ -98,17 +102,25 @@ class empty(_object):
     def __init__(self):
         self.image = img.load(object_list[1]).convert_alpha()
         self.setup()
+
+class dirt_1(_object):
+    def __init__(self):
+        self.image = img.load(object_list[2]).convert_alpha()
+        self.setup()
         
 # ADDNEW
 cobblestone_menu = _object(0, menu_slots[0])
 cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
 empty_menu = _object(1, menu_slots[1])
 empty_txt = fontbasic.render('Empty', True, (255, 255, 255))
+dirt_1_menu = _object(2, menu_slots[2])
+dirt_1_txt = fontbasic.render('Dirt_1', True, (255, 255, 255))
 
 # ADDNEW
 # Each object is represented by their _object.type value
 object_0 = _object(0, (0,0))
 object_1 = _object(1, (0,0))
+object_2 = _object(2, (0,0))
 
 def updates_and_draw():
     global scroll_tracker
@@ -163,6 +175,8 @@ def updates_and_draw():
     win.blit(cobblestone_txt, tupleadd(cobblestone_menu.location, (40, 2)))
     win.blit(empty_menu.image, empty_menu.location)
     win.blit(empty_txt, tupleadd(empty_menu.location, (40, 2)))
+    win.blit(dirt_1_menu.image, dirt_1_menu.location)
+    win.blit(dirt_1_txt, tupleadd(dirt_1_menu.location, (40, 2)))
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker,(0,scroll_vel))
