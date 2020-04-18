@@ -19,6 +19,8 @@ menu_slots = ((10,15),(10,62),(10,109),(10,156),(10,203),(10,250),(10,297),(10,3
 
 menu_pages_img = img.load("img_editor/menu_pages.png").convert_alpha()
 menu_sidebar_img = img.load("img_editor/menu_sidebar.png").convert_alpha()
+menu_y = img.load("img_editor/menu_y.png").convert_alpha()
+menu_x = img.load("img_editor/menu_x.png").convert_alpha()
 
 scroll_tracker = (0,0)
 scroll_vel = 7
@@ -37,9 +39,13 @@ current_map = []
 current_map_size = [50,20]
 
 # Takes the current map size and fills in current_map based on it
-for i in range(current_map_size[0]*current_map_size[1]):
-    current_map.append("1")
-
+def reloadmap():
+    global current_map_size
+    global current_map
+    current_map = []
+    for i in range(current_map_size[0]*current_map_size[1]):
+        current_map.append("1")
+reloadmap()
 
 # Adds tuples, stolen from here: https://stackoverflow.com/questions/5607284/how-to-add-with-tuples
 # USE LIKE THIS:
@@ -134,13 +140,14 @@ def updates_and_draw():
     
     # Update and draw menu sidebar
     win.blit(menu_sidebar_img, (-5,-5))
-    if menu_page == 1:
-        # Blitting cobblestone and text besides it
-        # ADDNEW
-        win.blit(cobblestone_menu.image, cobblestone_menu.location)
-        win.blit(cobblestone_txt, tupleadd(cobblestone_menu.location, (40, 2)))
-        win.blit(empty_menu.image, empty_menu.location)
-        win.blit(empty_txt, tupleadd(empty_menu.location, (40, 2)))
+    win.blit(menu_y,(93, 1017))
+    win.blit(menu_x,(93, 1042))
+    # Blitting cobblestone and text besides it
+    # ADDNEW
+    win.blit(cobblestone_menu.image, cobblestone_menu.location)
+    win.blit(cobblestone_txt, tupleadd(cobblestone_menu.location, (40, 2)))
+    win.blit(empty_menu.image, empty_menu.location)
+    win.blit(empty_txt, tupleadd(empty_menu.location, (40, 2)))
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker,(0,scroll_vel))
@@ -176,7 +183,22 @@ def updates_and_draw():
                 current_map[temp2*current_map_size[0]+temp1] = selected
                 new_object = True
             except:
-                print("User clicked outside of editor area")
+                print("User clicked outside of map area")
+        # if click is on map size changer area
+        elif 93 <= mouse_x <= 157 and 1017 <= mouse_y <= 1067:
+            # -y
+            if 93 <= mouse_x <= 125 and 1017 <= mouse_y <= 1042:
+                current_map_size[1] -= 1
+            # +y
+            elif 125 <= mouse_x <= 157 and 1017 <= mouse_y <= 1042:
+                current_map_size[1] += 1
+            # -x
+            elif 93 <= mouse_x <= 125 and 1042 <= mouse_y <= 1067:
+                current_map_size[0] -= 1
+            # +x
+            elif 125 <= mouse_x <= 157 and 1042 <= mouse_y <= 1067:
+                current_map_size[0] += 1
+            reloadmap()
 
 run = True
 while run:
@@ -193,10 +215,7 @@ while run:
         run = False
     
     if keys[pygame.K_c] and keys[pygame.K_LSHIFT]:
-        # Reset map
-        current_map = []
-        for i in range(current_map_size[0]*current_map_size[1]):
-            current_map.append("1")
+        reloadmap()
 
     
     
