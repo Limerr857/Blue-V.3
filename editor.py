@@ -188,9 +188,16 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     
-    # TODO: replace with actual menu
+    # TODO: replace with actual menu?
     if keys[pygame.K_ESCAPE]:
         run = False
+    
+    if keys[pygame.K_c] and keys[pygame.K_LSHIFT]:
+        # Reset map
+        current_map = []
+        for i in range(current_map_size[0]*current_map_size[1]):
+            current_map.append("1")
+
     
     
 
