@@ -28,9 +28,10 @@ new_object = True
 
 temp = 0
 
+# ADDNEW
 object_list = [
 
-    "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png"
+    "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png", "img_editor/dirt_2.png", "img_editor/dirt_3.png"
 
 ]
 
@@ -98,6 +99,10 @@ class _object(pygame.sprite.Sprite):
             empty.__init__(self)
         elif type == 2:
             dirt_1.__init__(self)
+        elif type == 3:
+            dirt_2.__init__(self)
+        elif type == 4:
+            dirt_3.__init__(self)
 
     def setup(self):
         self.size = self.image.get_rect().size
@@ -122,6 +127,16 @@ class dirt_1(_object):
         self.image = img.load(object_list[2]).convert_alpha()
         self.setup()
 
+class dirt_2(_object):
+    def __init__(self):
+        self.image = img.load(object_list[3]).convert_alpha()
+        self.setup()
+
+class dirt_3(_object):
+    def __init__(self):
+        self.image = img.load(object_list[4]).convert_alpha()
+        self.setup()
+
 
 # ADDNEW
 cobblestone_menu = _object(0, menu_slots[0])
@@ -130,12 +145,18 @@ empty_menu = _object(1, menu_slots[1])
 empty_txt = fontbasic.render('Empty', True, (255, 255, 255))
 dirt_1_menu = _object(2, menu_slots[2])
 dirt_1_txt = fontbasic.render('Dirt_1', True, (255, 255, 255))
+dirt_2_menu = _object(3, menu_slots[3])
+dirt_2_txt = fontbasic.render('Dirt_2', True, (255, 255, 255))
+dirt_3_menu = _object(4, menu_slots[4])
+dirt_3_txt = fontbasic.render('Dirt_3', True, (255, 255, 255))
 
 # ADDNEW
 # Each object is represented by their _object.type value
 object_0 = _object(0, (0, 0))
 object_1 = _object(1, (0, 0))
 object_2 = _object(2, (0, 0))
+object_3 = _object(3, (0, 0))
+object_4 = _object(4, (0, 0))
 
 
 def updates_and_draw():
@@ -196,6 +217,10 @@ def updates_and_draw():
     win.blit(empty_txt, tupleadd(empty_menu.location, (40, 2)))
     win.blit(dirt_1_menu.image, dirt_1_menu.location)
     win.blit(dirt_1_txt, tupleadd(dirt_1_menu.location, (40, 2)))
+    win.blit(dirt_2_menu.image, dirt_2_menu.location)
+    win.blit(dirt_2_txt, tupleadd(dirt_2_menu.location, (40, 2)))
+    win.blit(dirt_3_menu.image, dirt_3_menu.location)
+    win.blit(dirt_3_txt, tupleadd(dirt_3_menu.location, (40, 2)))
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))
