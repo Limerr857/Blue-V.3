@@ -31,7 +31,8 @@ temp = 0
 # ADDNEW
 object_list = [
 
-    "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png", "img_editor/dirt_2.png", "img_editor/dirt_3.png"
+    "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png", "img_editor/dirt_2.png", "img_editor/dirt_3.png",
+    "img_editor/player.png", "img_editor/flag.png"
 
 ]
 
@@ -53,7 +54,7 @@ reloadmap()
 
 # Adds tuples, stolen from here: https://stackoverflow.com/questions/5607284/how-to-add-with-tuples
 # USE LIKE THIS:
-# tupleadd((1,0),foo(a-b,b))
+# tupleadd((1,0),(a,b))
 
 
 def tupleadd(x, y):
@@ -92,10 +93,8 @@ class _object(pygame.sprite.Sprite):
         self.location = location
 
         if type == 0:
-            # Cobblestone
-            Cobblestone.__init__(self)
+            cobblestone.__init__(self)
         elif type == 1:
-            # Empty
             empty.__init__(self)
         elif type == 2:
             dirt_1.__init__(self)
@@ -103,6 +102,10 @@ class _object(pygame.sprite.Sprite):
             dirt_2.__init__(self)
         elif type == 4:
             dirt_3.__init__(self)
+        elif type == 5:
+            player.__init__(self)
+        elif type == 6:
+            flag.__init__(self)
 
     def setup(self):
         self.size = self.image.get_rect().size
@@ -110,53 +113,31 @@ class _object(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-class Cobblestone(_object):
-    def __init__(self):
-        self.image = img.load(object_list[0]).convert_alpha()
-        self.setup()
+def addobj(name,num):
+    exec("""class {}(_object):
+        def __init__(self):
+            self.image = img.load(object_list[{}]).convert_alpha()
+            self.setup()
+    """.format(name,num),globals())
 
+    exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,num),globals())
+    exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
 
-class empty(_object):
-    def __init__(self):
-        self.image = img.load(object_list[1]).convert_alpha()
-        self.setup()
+    exec("object_{} = _object({}, (0, 0))".format(num,num),globals())
 
-
-class dirt_1(_object):
-    def __init__(self):
-        self.image = img.load(object_list[2]).convert_alpha()
-        self.setup()
-
-class dirt_2(_object):
-    def __init__(self):
-        self.image = img.load(object_list[3]).convert_alpha()
-        self.setup()
-
-class dirt_3(_object):
-    def __init__(self):
-        self.image = img.load(object_list[4]).convert_alpha()
-        self.setup()
-
+def blitobj(name):
+    exec("win.blit({}_menu.image, {}_menu.location)".format(name,name),globals())
+    exec("win.blit({}_txt, tupleadd({}_menu.location, (40, 2)))".format(name,name),globals())
 
 # ADDNEW
-cobblestone_menu = _object(0, menu_slots[0])
-cobblestone_txt = fontbasic.render('Cobblestone', True, (255, 255, 255))
-empty_menu = _object(1, menu_slots[1])
-empty_txt = fontbasic.render('Empty', True, (255, 255, 255))
-dirt_1_menu = _object(2, menu_slots[2])
-dirt_1_txt = fontbasic.render('Dirt_1', True, (255, 255, 255))
-dirt_2_menu = _object(3, menu_slots[3])
-dirt_2_txt = fontbasic.render('Dirt_2', True, (255, 255, 255))
-dirt_3_menu = _object(4, menu_slots[4])
-dirt_3_txt = fontbasic.render('Dirt_3', True, (255, 255, 255))
+addobj("cobblestone", 0)
+addobj("empty", 1)
+addobj("dirt_1", 2)
+addobj("dirt_2", 3)
+addobj("dirt_3", 4)
+addobj("player", 5)
+addobj("flag", 6)
 
-# ADDNEW
-# Each object is represented by their _object.type value
-object_0 = _object(0, (0, 0))
-object_1 = _object(1, (0, 0))
-object_2 = _object(2, (0, 0))
-object_3 = _object(3, (0, 0))
-object_4 = _object(4, (0, 0))
 
 
 def updates_and_draw():
@@ -195,8 +176,7 @@ def updates_and_draw():
             tempx = temp*32+scroll_tracker[0]+250
             tempy = scroll_tracker[1]
         else:
-            tempx = (
-                temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
+            tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
             tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
         try:
             exec("win.blit(object_{}.image, ({},{}))".format(
@@ -211,16 +191,13 @@ def updates_and_draw():
     win.blit(menu_x, (93, 1042))
     # Blitting cobblestone and text besides it
     # ADDNEW
-    win.blit(cobblestone_menu.image, cobblestone_menu.location)
-    win.blit(cobblestone_txt, tupleadd(cobblestone_menu.location, (40, 2)))
-    win.blit(empty_menu.image, empty_menu.location)
-    win.blit(empty_txt, tupleadd(empty_menu.location, (40, 2)))
-    win.blit(dirt_1_menu.image, dirt_1_menu.location)
-    win.blit(dirt_1_txt, tupleadd(dirt_1_menu.location, (40, 2)))
-    win.blit(dirt_2_menu.image, dirt_2_menu.location)
-    win.blit(dirt_2_txt, tupleadd(dirt_2_menu.location, (40, 2)))
-    win.blit(dirt_3_menu.image, dirt_3_menu.location)
-    win.blit(dirt_3_txt, tupleadd(dirt_3_menu.location, (40, 2)))
+    blitobj("cobblestone")
+    blitobj("empty")
+    blitobj("dirt_1")
+    blitobj("dirt_2")
+    blitobj("dirt_3")
+    blitobj("player")
+    blitobj("flag")
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))
