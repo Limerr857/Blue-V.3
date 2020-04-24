@@ -83,15 +83,13 @@ def loadmap():
     f.close()
     new_object = True
 
-# ADDNEW
-
 
 class _object(pygame.sprite.Sprite):
 
     def __init__(self, type, location):
         self.type = type
         self.location = location
-
+        # ADDNEW
         if type == 0:
             cobblestone.__init__(self)
         elif type == 1:
