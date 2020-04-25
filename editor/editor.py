@@ -32,7 +32,7 @@ temp = 0
 object_list = [
 
     "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png", "img_editor/dirt_2.png", "img_editor/dirt_3.png",
-    "img_editor/player.png", "img_editor/flag.png"
+    "img_editor/player.png", "img_editor/flag.png", "img_editor/spike.png"
 
 ]
 
@@ -104,6 +104,8 @@ class _object(pygame.sprite.Sprite):
             player.__init__(self)
         elif type == 6:
             flag.__init__(self)
+        elif type == 7:
+            spike.__init__(self)
 
     def setup(self):
         self.size = self.image.get_rect().size
@@ -135,6 +137,7 @@ addobj("dirt_2", 3)
 addobj("dirt_3", 4)
 addobj("player", 5)
 addobj("flag", 6)
+addobj("spike", 7)
 
 
 
@@ -196,6 +199,7 @@ def updates_and_draw():
     blitobj("dirt_3")
     blitobj("player")
     blitobj("flag")
+    blitobj("spike")
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))

@@ -8,12 +8,12 @@ HEIGHT = 1080
 FPS = 60
 object_list = [
 
-    "img/cobble.png", "img/empty.png", "img/dirt_1.png", "img/dirt_2.png", "img/dirt_3.png", "img/empty.png", "img/flag.png"
+    "img/cobble.png", "img/empty.png", "img/dirt_1.png", "img/dirt_2.png", "img/dirt_3.png", "img/empty.png", "img/flag.png", "img/spike.png", "img/player_dead.png"
 
 ]
 TILESIZE = 32
 JUMPLENGTH = -6
-collision_list = [0,2,3,4,6]
+collision_list = [0,2,3,4,6,7,8]
 true_scroll = [0,0]
 scroll = [0,0]
 current_level = 1
@@ -24,6 +24,7 @@ moving_right = False
 moving_left = False
 vertical_momentum = 0
 air_timer = 0
+player_corpses = []
 
 # define colors
 WHITE = (255, 255, 255)

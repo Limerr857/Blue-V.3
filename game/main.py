@@ -34,12 +34,10 @@ class _object(pygame.sprite.Sprite):
     def __init__(self, type, location):
         self.type = type
         self.location = location
-
+        # ADDNEW
         if type == 0:
-            # Cobblestone
             cobblestone.__init__(self)
         elif type == 1:
-            # Empty
             empty.__init__(self)
         elif type == 2:
             dirt_1.__init__(self)
@@ -52,6 +50,10 @@ class _object(pygame.sprite.Sprite):
             empty.__init__(self)
         elif type == 6:
             flag.__init__(self)
+        elif type == 7:
+            spike.__init__(self)
+        elif type == 8:
+            player_dead.__init__(self)
 
     def setup(self):
         self.size = self.image.get_rect().size
@@ -68,6 +70,7 @@ def addobj(name,num):
     exec("object_{} = _object({}, (0, 0))".format(num,num),globals())
 
 # Blocks
+# ADDNEW
 addobj("cobblestone", 0)
 addobj("empty", 1)
 addobj("dirt_1", 2)
@@ -75,6 +78,8 @@ addobj("dirt_2", 3)
 addobj("dirt_3", 4)
 addobj("player_marker", 5)
 addobj("flag", 6)
+addobj("spike", 7)
+addobj("player_dead", 8)
 
 def loadmap(file):
     global current_map
@@ -110,12 +115,37 @@ def check_collide_sub(slot_x,slot_y):
         temp += 1
         
 
+def player_death():
+    global player_corpses
+    global player
+    global current_map
+    global current_map_size
+    global TILESIZE
+
+    # Add players corpse to a list, blit separately from other things
+    player_corpses.append(pygame.Rect(player.rect.x,player.rect.y,TILESIZE,TILESIZE))
+    temp = 0
+    for obj in current_map:
+        if current_map_size[0] > temp:
+            tempx = temp*TILESIZE
+            tempy = 0
+        else:
+            tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*TILESIZE
+            tempy = int(temp/current_map_size[0])*TILESIZE
+        if int(obj) == 5:
+            player.rect.x = tempx
+            player.rect.y = tempy
+        temp += 1
+
+
+
 def collision_test(rect,tiles):
     hit_list = []
     for tile in tiles:
         if rect.colliderect(tile):
             hit_list.append(tile)
     return hit_list
+
 
 def move(rect,movement,tiles,hit_types):
     collision_types = {'top':False,'bottom':False,'right':False,'left':False}
@@ -166,7 +196,9 @@ while True: # game loop
                 tile_rects.append(pygame.Rect(tempx,tempy,TILESIZE,TILESIZE))
             exec("display.blit(object_{}.image, ({},{}))".format(obj, tempx-scroll[0], tempy-scroll[1]), globals())
             temp += 1
-
+        for obj in player_corpses:
+            display.blit(object_8.image, (obj.x-scroll[0],obj.y-scroll[1]))
+            tile_rects.append(obj)
         player_movement = [0,0]
         if moving_right == True:
             player_movement[0] += player.speed
@@ -178,6 +210,8 @@ while True: # game loop
             vertical_momentum = JUMPLENGTH*-1
 
         player.rect,collisions = move(player.rect,player_movement,tile_rects,hit_types)
+        if 7 in hit_types and collisions["bottom"] == True:
+            player_death()
 
         if collisions['bottom'] == True:
             air_timer = 0
@@ -190,9 +224,11 @@ while True: # game loop
         # Check if player is touching flag and end level
         if 6 in hit_types:
             game_state = "new_level"
+        
 
         display.blit(player.image,(player.rect.x-scroll[0],player.rect.y-scroll[1]))
 
+        # Check if player is touching spike and kill player
         for event in pygame.event.get(): # event loop
             if event.type == QUIT:
                 pygame.quit()
@@ -218,6 +254,7 @@ while True: # game loop
 
     elif game_state == "load_level":
         exec("loadmap('levels/lvl_{}.txt')".format(current_level))
+        player_corpses = []
         temp = 0
         for obj in current_map:
             if current_map_size[0] > temp:
