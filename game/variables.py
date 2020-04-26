@@ -8,7 +8,8 @@ HEIGHT = 1080
 FPS = 60
 object_list = [
 
-    "img/cobble.png", "img/empty.png", "img/dirt_1.png", "img/dirt_2.png", "img/dirt_3.png", "img/empty.png", "img/flag.png", "img/spike.png", "img/player_dead.png"
+    "img/cobble.png", "img/empty.png", "img/dirt_1.png", "img/dirt_2.png", "img/dirt_3.png", "img/empty.png", "img/flag.png",
+    "img/spike.png", "img/player_dead.png"
 
 ]
 TILESIZE = 32

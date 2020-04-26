@@ -14,7 +14,7 @@ fontbasic = pygame.font.SysFont('Calibri', 30)
 
 menu_page = 1
 menu_slots = ((10, 15), (10, 62), (10, 109), (10, 156), (10, 203), (10, 250), (10, 297), (10, 344), (10, 391), (10, 438),
-              (10, 485), (10, 532), (10, 579), (10, 626), (10, 673), (10, 720), (10, 767), (10, 814), (10, 861), (10, 908), (10, 955))
+              (10, 485), (10, 532), (10, 579), (10, 626), (10, 673), (10, 720), (10, 767), (10, 814), (10, 861), (10, 908))
 
 menu_pages_img = img.load("img_editor/menu_pages.png").convert_alpha()
 menu_sidebar_img = img.load("img_editor/menu_sidebar.png").convert_alpha()
@@ -32,8 +32,16 @@ temp = 0
 object_list = [
 
     "img_editor/cobble.png", "img_editor/empty.png", "img_editor/dirt_1.png", "img_editor/dirt_2.png", "img_editor/dirt_3.png",
-    "img_editor/player.png", "img_editor/flag.png", "img_editor/spike.png"
-
+    "img_editor/player.png", "img_editor/flag.png", "img_editor/spike.png", "img_editor/player_dead.png", "img_editor/clone_1.png",
+    "img_editor/clone_2.png", "img_editor/clone_3.png", "img_editor/clone_4.png", "img_editor/clone_5.png", "img_editor/clone_6.png",
+    "img_editor/clone_7.png", "img_editor/clone_8.png", "img_editor/clone_9.png", "img_editor/clone_10.png", "img_editor/clone_11.png",
+    "img_editor/clone_12.png", "img_editor/clone_13.png"
+ 
+]
+objects = [
+    "cobblestone", "empty", "dirt_1", "dirt_2", "dirt_3", "player", "flag", "spike", "player_dead", "clone_1",
+    "clone_2", "clone_3", "clone_4", "clone_5", "clone_6", "clone_7", "clone_8", "clone_9", "clone_10", "clone_11",
+    "clone_12", "clone_13"
 ]
 
 current_map = []
@@ -90,22 +98,53 @@ class _object(pygame.sprite.Sprite):
         self.type = type
         self.location = location
         # ADDNEW
-        if type == 0:
-            cobblestone.__init__(self)
-        elif type == 1:
-            empty.__init__(self)
-        elif type == 2:
-            dirt_1.__init__(self)
-        elif type == 3:
-            dirt_2.__init__(self)
-        elif type == 4:
-            dirt_3.__init__(self)
-        elif type == 5:
-            player.__init__(self)
-        elif type == 6:
-            flag.__init__(self)
-        elif type == 7:
-            spike.__init__(self)
+        exec("{}.__init__(self)".format(objects[type]))
+        # TODO: DELETE THIS:
+        # if type == 0:
+        #     cobblestone.__init__(self)
+        # elif type == 1:
+        #     empty.__init__(self)
+        # elif type == 2:
+        #     dirt_1.__init__(self)
+        # elif type == 3:
+        #     dirt_2.__init__(self)
+        # elif type == 4:
+        #     dirt_3.__init__(self)
+        # elif type == 5:
+        #     player.__init__(self)
+        # elif type == 6:
+        #     flag.__init__(self)
+        # elif type == 7:
+        #     spike.__init__(self)
+        # elif type == 8:
+        #     player_dead.__init__(self)
+        # elif type == 9:
+        #     clone_1.__init__(self)
+        # elif type == 10:
+        #     clone_2.__init__(self)
+        # elif type == 11:
+        #     clone_3.__init__(self)
+        # elif type == 12:
+        #     clone_4.__init__(self)
+        # elif type == 13:
+        #     clone_5.__init__(self)
+        # elif type == 14:
+        #     clone_6.__init__(self)
+        # elif type == 15:
+        #     clone_7.__init__(self)
+        # elif type == 16:
+        #     clone_8.__init__(self)
+        # elif type == 17:
+        #     clone_9.__init__(self)
+        # elif type == 18:
+        #     clone_10.__init__(self)
+        # elif type == 19:
+        #     clone_11.__init__(self)
+        # elif type == 20:
+        #     clone_12.__init__(self)
+        # elif type == 21:
+        #     clone_13.__init__(self)
+
 
     def setup(self):
         self.size = self.image.get_rect().size
@@ -120,24 +159,55 @@ def addobj(name,num):
             self.setup()
     """.format(name,num),globals())
 
-    exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,num),globals())
-    exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
+    if num < len(menu_slots):
+        exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,num),globals())
+        exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
+    else:
+        loops = int(num/len(menu_slots))
+        temp = num-int(len(menu_slots)*loops)
+        exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,temp),globals())
+        exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
 
     exec("object_{} = _object({}, (0, 0))".format(num,num),globals())
 
-def blitobj(name):
-    exec("win.blit({}_menu.image, {}_menu.location)".format(name,name),globals())
-    exec("win.blit({}_txt, tupleadd({}_menu.location, (40, 2)))".format(name,name),globals())
+def blitobj(name,num):
+    loops = int(num/len(menu_slots))
+    if menu_page == loops+1:
+        # if the obj is in the current menu_page, blit it
+        exec("win.blit({}_menu.image, {}_menu.location)".format(name,name),globals())
+        exec("win.blit({}_txt, tupleadd({}_menu.location, (40, 2)))".format(name,name),globals())
+    else:
+        # Don't blit
+        pass
 
 # ADDNEW
-addobj("cobblestone", 0)
-addobj("empty", 1)
-addobj("dirt_1", 2)
-addobj("dirt_2", 3)
-addobj("dirt_3", 4)
-addobj("player", 5)
-addobj("flag", 6)
-addobj("spike", 7)
+temp = 0
+for obj in objects:
+    exec("addobj('{}', {})".format(obj,temp),globals())
+    temp+=1
+# TODO: DELETE THIS:
+# addobj("cobblestone", 0)
+# addobj("empty", 1)
+# addobj("dirt_1", 2)
+# addobj("dirt_2", 3)
+# addobj("dirt_3", 4)
+# addobj("player", 5)
+# addobj("flag", 6)
+# addobj("spike", 7)
+# addobj("player_dead", 8)
+# addobj("clone_1", 9)
+# addobj("clone_2", 10)
+# addobj("clone_3", 11)
+# addobj("clone_4", 12)
+# addobj("clone_5", 13)
+# addobj("clone_6", 14)
+# addobj("clone_7", 15)
+# addobj("clone_8", 16)
+# addobj("clone_9", 17)
+# addobj("clone_10", 18)
+# addobj("clone_11", 19)
+# addobj("clone_12", 20)
+# addobj("clone_13", 21)
 
 
 
@@ -149,28 +219,29 @@ def updates_and_draw():
     global temp
     global mouse_1
     global new_object
+    global menu_page
 
     win.fill((0, 0, 0))
 
     # Insert editor tiles
-    if new_object:
-        temp = 0
-        for obj in current_map:
-            if current_map_size[0] > temp:
-                tempx = temp*32+scroll_tracker[0]+250
-                tempy = scroll_tracker[1]
-            else:
-                tempx = (
-                    temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
-                tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
-
-            try:
-                exec("win.blit(object_{}.image, ({},{}))".format(
-                    obj, tempx, tempy), globals())
-            except NameError:
-                print("User has probably selected non-existant block from sidebar")
-            temp += 1
-        new_object = False
+    # TODO: Delete if nothing breaks
+    # if new_object:
+    #     temp = 0
+    #     for obj in current_map:
+    #         if current_map_size[0] > temp:
+    #             tempx = temp*32+scroll_tracker[0]+250
+    #             tempy = scroll_tracker[1]
+    #         else:
+    #             tempx = (
+    #                 temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
+    #             tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
+    #         try:
+    #             exec("win.blit(object_{}.image, ({},{}))".format(
+    #                 obj, tempx, tempy), globals())
+    #         except NameError:
+    #             print("User has probably selected non-existant block from sidebar")
+    #         temp += 1
+    #     new_object = False
     temp = 0
     for obj in current_map:
         if current_map_size[0] > temp:
@@ -190,16 +261,36 @@ def updates_and_draw():
     win.blit(menu_sidebar_img, (-5, -5))
     win.blit(menu_y, (93, 1017))
     win.blit(menu_x, (93, 1042))
+    win.blit(menu_pages_img, (75, 977))
     # Blitting cobblestone and text besides it
     # ADDNEW
-    blitobj("cobblestone")
-    blitobj("empty")
-    blitobj("dirt_1")
-    blitobj("dirt_2")
-    blitobj("dirt_3")
-    blitobj("player")
-    blitobj("flag")
-    blitobj("spike")
+    temp = 0
+    for obj in objects:
+        exec("blitobj('{}', {})".format(obj,temp),globals())
+        temp+=1
+    # TODO: DELETE THIS:
+    # blitobj("cobblestone", 0)
+    # blitobj("empty", 1)
+    # blitobj("dirt_1", 2)
+    # blitobj("dirt_2", 3)
+    # blitobj("dirt_3", 4)
+    # blitobj("player", 5)
+    # blitobj("flag", 6)
+    # blitobj("spike", 7)
+    # blitobj("player_dead", 8)
+    # blitobj("clone_1", 9)
+    # blitobj("clone_2", 10)
+    # blitobj("clone_3", 11)
+    # blitobj("clone_4", 12)
+    # blitobj("clone_5", 13)
+    # blitobj("clone_6", 14)
+    # blitobj("clone_7", 15)
+    # blitobj("clone_8", 16)
+    # blitobj("clone_9", 17)
+    # blitobj("clone_10", 18)
+    # blitobj("clone_11", 19)
+    # blitobj("clone_12", 20)
+    # blitobj("clone_13", 21)
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))
@@ -222,7 +313,7 @@ def updates_and_draw():
         for slot in menu_slots:
             # if click is inside of slot
             if slot[0] <= mouse_x <= (slot[0]+232) and slot[1] <= mouse_y <= (slot[1]+32):
-                selected = temp
+                selected = temp+len(menu_slots)*(menu_page-1)
             temp += 1
 
         # if click is inside editing area
@@ -250,6 +341,20 @@ def updates_and_draw():
             elif 125 <= mouse_x <= 157 and 1042 <= mouse_y <= 1067:
                 current_map_size[0] += 1
             reloadmap()
+        # if clock is on page changer area
+        elif 75 <= mouse_x <= 163 and 977 <= mouse_y <= 1012:
+            # 1
+            if 75 <= mouse_x <= 90:
+                menu_page = 1
+            # 2
+            elif 91 <= mouse_x <= 109:
+                menu_page = 2
+            # 3
+            elif 110 <= mouse_x <= 127:
+                menu_page = 3
+            # 4
+            elif 128 <= mouse_x <= 147:
+                menu_page = 4
 
 
 run = True
