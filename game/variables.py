@@ -9,12 +9,15 @@ FPS = 60
 object_list = [
 
     "img/cobble.png", "img/empty.png", "img/dirt_1.png", "img/dirt_2.png", "img/dirt_3.png", "img/empty.png", "img/flag.png",
-    "img/spike.png", "img/player_dead.png"
+    "img/spike.png", "img/player_dead.png", "img/clone_1.png", "img/clone_2.png", "img/clone_3.png",
+    "img/clone_4.png", "img/clone_5.png", "img/clone_6.png", "img/clone_7.png", "img/clone_8.png",
+    "img/clone_9.png", "img/clone_10.png", "img/clone_11.png","img/clone_12.png", "img/clone_13.png"
 
 ]
 TILESIZE = 32
 JUMPLENGTH = -6
-collision_list = [0,2,3,4,6,7,8]
+# 21 is clone_13
+collision_list = [0,2,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
 true_scroll = [0,0]
 scroll = [0,0]
 current_level = 1
@@ -26,6 +29,8 @@ moving_left = False
 vertical_momentum = 0
 air_timer = 0
 player_corpses = []
+# The current cloning machine, where player will be 
+current_clone = []
 
 # define colors
 WHITE = (255, 255, 255)
@@ -36,4 +41,12 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 LIGHTBLUE = (146,244,255)
 
-
+# every menu sprite is contained in this menu object
+class menus():
+    def __init__(self):
+        pass
+    def loadall(self):
+        self.game_over_bg = img.load("img/game_over_bg.png").convert()
+        self.game_over_restart = img.load("img/go_restart.png").convert_alpha()
+        self.game_over_restart_select = img.load("img/go_restart_select.png").convert_alpha()
+menu = menus()
