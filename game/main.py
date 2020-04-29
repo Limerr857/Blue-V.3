@@ -38,52 +38,12 @@ class _object(pygame.sprite.Sprite):
     def __init__(self, type, location):
         self.type = type
         self.location = location
-        # ADDNEW
-        if type == 0:
-            cobblestone.__init__(self)
-        elif type == 1:
-            empty.__init__(self)
-        elif type == 2:
-            dirt_1.__init__(self)
-        elif type == 3:
-            dirt_2.__init__(self)
-        elif type == 4:
-            dirt_3.__init__(self)
+        
+        if type != 5:
+            exec("{}.__init__(self)".format(object_name_list[type]))
         elif type == 5:
             # player spawn marker, rendered as empty
             empty.__init__(self)
-        elif type == 6:
-            flag.__init__(self)
-        elif type == 7:
-            spike.__init__(self)
-        elif type == 8:
-            player_dead.__init__(self)
-        elif type == 9:
-            clone_1.__init__(self)
-        elif type == 10:
-            clone_2.__init__(self)
-        elif type == 11:
-            clone_3.__init__(self)
-        elif type == 12:
-            clone_4.__init__(self)
-        elif type == 13:
-            clone_5.__init__(self)
-        elif type == 14:
-            clone_6.__init__(self)
-        elif type == 15:
-            clone_7.__init__(self)
-        elif type == 16:
-            clone_8.__init__(self)
-        elif type == 17:
-            clone_9.__init__(self)
-        elif type == 18:
-            clone_10.__init__(self)
-        elif type == 19:
-            clone_11.__init__(self)
-        elif type == 20:
-            clone_12.__init__(self)
-        elif type == 21:
-            clone_13.__init__(self)
 
 
     def setup(self):
@@ -94,36 +54,18 @@ class _object(pygame.sprite.Sprite):
 def addobj(name,num):
     exec("""class {}(_object):
         def __init__(self):
-            self.image = img.load(object_list[{}]).convert_alpha()
+            self.image = img.load('img/' + object_name_list[{}] + '.png').convert_alpha()
             self.setup()
     """.format(name,num),globals())
 
     exec("object_{} = _object({}, (0, 0))".format(num,num),globals())
 
-# Blocks
-# ADDNEW
-addobj("cobblestone", 0)
-addobj("empty", 1)
-addobj("dirt_1", 2)
-addobj("dirt_2", 3)
-addobj("dirt_3", 4)
-addobj("player_marker", 5)
-addobj("flag", 6)
-addobj("spike", 7)
-addobj("player_dead", 8)
-addobj("clone_1", 9)
-addobj("clone_2", 10)
-addobj("clone_3", 11)
-addobj("clone_4", 12)
-addobj("clone_5", 13)
-addobj("clone_6", 14)
-addobj("clone_7", 15)
-addobj("clone_8", 16)
-addobj("clone_9", 17)
-addobj("clone_10", 18)
-addobj("clone_11", 19)
-addobj("clone_12", 20)
-addobj("clone_13", 21)
+# blit all blocks
+temp = 0
+for obj in object_name_list:
+    exec("addobj('{}', {})".format(obj,temp),globals())
+    temp+=1
+
 
 def loadmap(file):
     global current_map

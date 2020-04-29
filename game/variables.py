@@ -6,12 +6,12 @@ TITLE = "Blue V.3"
 WIDTH = 1920
 HEIGHT = 1080
 FPS = 60
-object_list = [
+object_name_list = [
 
-    "img/cobble.png", "img/empty.png", "img/dirt_1.png", "img/dirt_2.png", "img/dirt_3.png", "img/empty.png", "img/flag.png",
-    "img/spike.png", "img/player_dead.png", "img/clone_1.png", "img/clone_2.png", "img/clone_3.png",
-    "img/clone_4.png", "img/clone_5.png", "img/clone_6.png", "img/clone_7.png", "img/clone_8.png",
-    "img/clone_9.png", "img/clone_10.png", "img/clone_11.png","img/clone_12.png", "img/clone_13.png"
+    "cobblestone", "empty", "dirt_1", "dirt_2", "dirt_3", "empty", "flag",
+    "spike", "player_dead", "clone_1", "clone_2", "clone_3",
+    "clone_4", "clone_5", "clone_6", "clone_7", "clone_8",
+    "clone_9", "clone_10", "clone_11","clone_12", "clone_13"
 
 ]
 TILESIZE = 32

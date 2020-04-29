@@ -97,53 +97,7 @@ class _object(pygame.sprite.Sprite):
     def __init__(self, type, location):
         self.type = type
         self.location = location
-        # ADDNEW
         exec("{}.__init__(self)".format(objects[type]))
-        # TODO: DELETE THIS:
-        # if type == 0:
-        #     cobblestone.__init__(self)
-        # elif type == 1:
-        #     empty.__init__(self)
-        # elif type == 2:
-        #     dirt_1.__init__(self)
-        # elif type == 3:
-        #     dirt_2.__init__(self)
-        # elif type == 4:
-        #     dirt_3.__init__(self)
-        # elif type == 5:
-        #     player.__init__(self)
-        # elif type == 6:
-        #     flag.__init__(self)
-        # elif type == 7:
-        #     spike.__init__(self)
-        # elif type == 8:
-        #     player_dead.__init__(self)
-        # elif type == 9:
-        #     clone_1.__init__(self)
-        # elif type == 10:
-        #     clone_2.__init__(self)
-        # elif type == 11:
-        #     clone_3.__init__(self)
-        # elif type == 12:
-        #     clone_4.__init__(self)
-        # elif type == 13:
-        #     clone_5.__init__(self)
-        # elif type == 14:
-        #     clone_6.__init__(self)
-        # elif type == 15:
-        #     clone_7.__init__(self)
-        # elif type == 16:
-        #     clone_8.__init__(self)
-        # elif type == 17:
-        #     clone_9.__init__(self)
-        # elif type == 18:
-        #     clone_10.__init__(self)
-        # elif type == 19:
-        #     clone_11.__init__(self)
-        # elif type == 20:
-        #     clone_12.__init__(self)
-        # elif type == 21:
-        #     clone_13.__init__(self)
 
 
     def setup(self):
@@ -180,34 +134,10 @@ def blitobj(name,num):
         # Don't blit
         pass
 
-# ADDNEW
 temp = 0
 for obj in objects:
     exec("addobj('{}', {})".format(obj,temp),globals())
     temp+=1
-# TODO: DELETE THIS:
-# addobj("cobblestone", 0)
-# addobj("empty", 1)
-# addobj("dirt_1", 2)
-# addobj("dirt_2", 3)
-# addobj("dirt_3", 4)
-# addobj("player", 5)
-# addobj("flag", 6)
-# addobj("spike", 7)
-# addobj("player_dead", 8)
-# addobj("clone_1", 9)
-# addobj("clone_2", 10)
-# addobj("clone_3", 11)
-# addobj("clone_4", 12)
-# addobj("clone_5", 13)
-# addobj("clone_6", 14)
-# addobj("clone_7", 15)
-# addobj("clone_8", 16)
-# addobj("clone_9", 17)
-# addobj("clone_10", 18)
-# addobj("clone_11", 19)
-# addobj("clone_12", 20)
-# addobj("clone_13", 21)
 
 
 
@@ -268,29 +198,6 @@ def updates_and_draw():
     for obj in objects:
         exec("blitobj('{}', {})".format(obj,temp),globals())
         temp+=1
-    # TODO: DELETE THIS:
-    # blitobj("cobblestone", 0)
-    # blitobj("empty", 1)
-    # blitobj("dirt_1", 2)
-    # blitobj("dirt_2", 3)
-    # blitobj("dirt_3", 4)
-    # blitobj("player", 5)
-    # blitobj("flag", 6)
-    # blitobj("spike", 7)
-    # blitobj("player_dead", 8)
-    # blitobj("clone_1", 9)
-    # blitobj("clone_2", 10)
-    # blitobj("clone_3", 11)
-    # blitobj("clone_4", 12)
-    # blitobj("clone_5", 13)
-    # blitobj("clone_6", 14)
-    # blitobj("clone_7", 15)
-    # blitobj("clone_8", 16)
-    # blitobj("clone_9", 17)
-    # blitobj("clone_10", 18)
-    # blitobj("clone_11", 19)
-    # blitobj("clone_12", 20)
-    # blitobj("clone_13", 21)
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))
