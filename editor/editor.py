@@ -11,6 +11,7 @@ win = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN)
 pygame.display.set_caption("Blue V.3 Editor")
 clock = pygame.time.Clock()
 fontbasic = pygame.font.SysFont('Calibri', 30)
+fontbasic_small = pygame.font.SysFont('Calibri', 15)
 
 menu_page = 1
 menu_slots = ((10, 15), (10, 62), (10, 109), (10, 156), (10, 203), (10, 250), (10, 297), (10, 344), (10, 391), (10, 438),
@@ -35,13 +36,13 @@ object_list = [
     "img_editor/player.png", "img_editor/flag.png", "img_editor/spike.png", "img_editor/player_dead.png", "img_editor/clone_1.png",
     "img_editor/clone_2.png", "img_editor/clone_3.png", "img_editor/clone_4.png", "img_editor/clone_5.png", "img_editor/clone_6.png",
     "img_editor/clone_7.png", "img_editor/clone_8.png", "img_editor/clone_9.png", "img_editor/clone_10.png", "img_editor/clone_11.png",
-    "img_editor/clone_12.png", "img_editor/clone_13.png"
+    "img_editor/clone_12.png", "img_editor/clone_13.png", "img_editor/enemy_bounce_x.png", "img_editor/enemy_bounce_y.png"
  
 ]
 objects = [
     "cobblestone", "empty", "dirt_1", "dirt_2", "dirt_3", "player", "flag", "spike", "player_dead", "clone_1",
     "clone_2", "clone_3", "clone_4", "clone_5", "clone_6", "clone_7", "clone_8", "clone_9", "clone_10", "clone_11",
-    "clone_12", "clone_13"
+    "clone_12", "clone_13", "enemy_bounce_x", "enemy_bounce_y"
 ]
 
 current_map = []
@@ -115,14 +116,19 @@ def addobj(name,num):
 
     if num < len(menu_slots):
         exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,num),globals())
-        exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
     else:
         loops = int(num/len(menu_slots))
         temp = num-int(len(menu_slots)*loops)
         exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,temp),globals())
+    
+    # if text is not too long to fit
+    if len(name) <= 12:
         exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
+    else:
+        exec("{}_txt = fontbasic_small.render('{}', True, (255, 255, 255))".format(name,name),globals())
 
     exec("object_{} = _object({}, (0, 0))".format(num,num),globals())
+
 
 def blitobj(name,num):
     loops = int(num/len(menu_slots))
@@ -153,25 +159,6 @@ def updates_and_draw():
 
     win.fill((0, 0, 0))
 
-    # Insert editor tiles
-    # TODO: Delete if nothing breaks
-    # if new_object:
-    #     temp = 0
-    #     for obj in current_map:
-    #         if current_map_size[0] > temp:
-    #             tempx = temp*32+scroll_tracker[0]+250
-    #             tempy = scroll_tracker[1]
-    #         else:
-    #             tempx = (
-    #                 temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
-    #             tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
-    #         try:
-    #             exec("win.blit(object_{}.image, ({},{}))".format(
-    #                 obj, tempx, tempy), globals())
-    #         except NameError:
-    #             print("User has probably selected non-existant block from sidebar")
-    #         temp += 1
-    #     new_object = False
     temp = 0
     for obj in current_map:
         if current_map_size[0] > temp:
@@ -192,8 +179,7 @@ def updates_and_draw():
     win.blit(menu_y, (93, 1017))
     win.blit(menu_x, (93, 1042))
     win.blit(menu_pages_img, (75, 977))
-    # Blitting cobblestone and text besides it
-    # ADDNEW
+
     temp = 0
     for obj in objects:
         exec("blitobj('{}', {})".format(obj,temp),globals())
