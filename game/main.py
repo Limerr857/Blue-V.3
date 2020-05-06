@@ -111,8 +111,8 @@ def check_collide(hit_list):
         slot_y = int(tile.y/TILESIZE)
         hit_types.append(check_collide_sub(slot_x,slot_y))
         # if player is colliding with a clone machine block
-        for i in range(9, 21): 
-            if i in hit_types:
+        for i in range(9, 20): 
+            if i == current_map[current_map_size[0]*slot_y+slot_x]:
                 current_clone = [tile.x,tile.y]
 
 
@@ -141,6 +141,12 @@ def player_death(generate_corpse):
     global current_clone
     global game_state
 
+    tilex = int(current_clone[0]/TILESIZE)
+    tiley = int(current_clone[1]/TILESIZE)
+    # if the cloning machine is empty before removing a level
+    if current_map[current_map_size[0]*tiley+tilex] >= 21:
+        # empty current_clone
+        current_clone = []
     # if player has died with no cloning machine to clone from
     if current_clone == []:
         game_state = "game_over"
@@ -148,15 +154,10 @@ def player_death(generate_corpse):
     # Add players corpse to a list, blit separately from other things
     if generate_corpse:
         player_corpses.append(pygame.Rect(player.rect.x,player.rect.y,TILESIZE,TILESIZE))
-    tilex = int(current_clone[0]/TILESIZE)
-    tiley = int(current_clone[1]/TILESIZE)
     player.rect.x = current_clone[0]
     player.rect.y = current_clone[1]-TILESIZE
     current_map[current_map_size[0]*tiley+tilex] += 1
-    # if the cloning machine is empty after removing a level
-    if current_map[current_map_size[0]*tiley+tilex] == 21:
-        # empty current_clone
-        current_clone = []
+    
 
 
 def blit_if_selected(name,module,x_start,x_end,y_start,y_end):
@@ -401,6 +402,9 @@ while True: # game loop
                 # TODO REPLACE
                 pygame.quit()
                 sys.exit()
+            if event.key == K_k:
+                # TODO REPLACE
+                player_death(False)
         if event.type == KEYUP:
             if event.key == K_RIGHT:
                 moving_right = False
