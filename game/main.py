@@ -32,6 +32,22 @@ class Player(pygame.sprite.Sprite):
         self.speed = 4
 player = Player()
 
+enemy_group = pygame.sprite.Group()
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, type, location_x, location_y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = exec("{}.__init__(self)".format(object_name_list[type]))
+        self.rect.x = location_x
+        self.rect.y = location_y
+        self.type = type
+        self.movement_tracker = -1
+        enemy_group.add(self)
+
+    def setup(self):
+        self.size = self.image.get_rect().size
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+
 # Objects
 class _object(pygame.sprite.Sprite):
 
@@ -76,6 +92,7 @@ def loadmap(file):
     global current_map_size
     global current_enemies
     global enemy_list
+    global enemy_group
     f = open(file, "rb")
     current_map_size, current_map = pickle.load(f)
     f.close()
@@ -83,9 +100,11 @@ def loadmap(file):
     # Reset the current enemy count
     current_enemies = []
     current_enemies_rect = []
+    enemy_group.empty()
 
     # Adds enemies in map to enemy list
     temp = 0
+    temp2 = 0
     for obj in current_map:
         if current_map_size[0] > temp:
             tempx = temp*TILESIZE
@@ -98,7 +117,9 @@ def loadmap(file):
             #                      Enemy type             Enemy rect                    Bounce reverse factor
             current_enemies.append([int(obj),pygame.Rect(tempx,tempy,TILESIZE,TILESIZE),1])
             current_enemies_rect.append(pygame.Rect(tempx,tempy,TILESIZE,TILESIZE))
-        temp += 1
+            exec("enemy_{} = Enemy({},{},{})".format(temp2,int(obj),tempx,tempy))
+            temp2+=1
+        temp+=1
 loadmap("levels/lvl_1.txt")
 
 def check_collide(hit_list):
@@ -140,7 +161,9 @@ def player_death(generate_corpse):
     global TILESIZE
     global current_clone
     global game_state
+    print("DEAD")
 
+    # if player has died with no cloning machine to clone from
     tilex = int(current_clone[0]/TILESIZE)
     tiley = int(current_clone[1]/TILESIZE)
     # if the cloning machine is empty before removing a level
@@ -156,8 +179,7 @@ def player_death(generate_corpse):
         player_corpses.append(pygame.Rect(player.rect.x,player.rect.y,TILESIZE,TILESIZE))
     player.rect.x = current_clone[0]
     player.rect.y = current_clone[1]-TILESIZE
-    current_map[current_map_size[0]*tiley+tilex] += 1
-    
+    current_map[current_map_size[0]*tiley+tilex] += 1  
 
 
 def blit_if_selected(name,module,x_start,x_end,y_start,y_end):
@@ -192,15 +214,33 @@ def enemy_collision_test(rect,enemies):
     return enemy_hit_list
 
 
-def move(rect,movement,tiles,hit_types,isplayer):
-    global current_enemies_rect
+def move(rect,movement,tiles,hit_types,isplayer,secondpass):
+    global enemy_group
     collision_types = {'top':False,'bottom':False,'right':False,'left':False}
     rect.x += movement[0]
     hit_list = collision_test(rect,tiles)
     enemy_hit_list = []
     if isplayer:
         check_collide(hit_list)
-        enemy_hit_list = enemy_collision_test(rect,current_enemies_rect)
+        enemy_hit_list = enemy_collision_test(rect,enemy_group.sprites())
+        # kills player if they are touching enemy
+        if enemy_hit_list != []:
+            if movement == [0,0]:
+                if not secondpass:
+                    player_death(True)
+            else:
+                if not secondpass:
+                    print(movement[0])
+                    if movement[0] < 0:
+                        movement[0] += player.speed
+                    elif movement[0] > 0:
+                        movement[0] -= player.speed
+                    if movement[1] < 0:
+                        movement[1] += player.speed
+                    elif movement[1] > 0:
+                        movement[1] -= player.speed
+                    rect,collisions = move(rect,movement,tile_rects,hit_types,True,True)
+                    player_death(True)
     for tile in hit_list:
         if movement[0] > 0:
             rect.right = tile.left
@@ -208,14 +248,29 @@ def move(rect,movement,tiles,hit_types,isplayer):
         elif movement[0] < 0:
             rect.left = tile.right
             collision_types['left'] = True
-    # kills player if they are touching enemy
-    if enemy_hit_list != []:
-        player_death(False)
     rect.y += movement[1]
     hit_list = collision_test(rect,tiles)
     if isplayer:
         check_collide(hit_list)
-        enemy_hit_list = enemy_collision_test(rect,current_enemies_rect)
+        enemy_hit_list = enemy_collision_test(rect,enemy_group.sprites())
+        # kills player if they are touching enemy
+        if enemy_hit_list != []:
+            if movement == [0,0]:
+                if not secondpass:
+                    player_death(True)
+            else:
+                if not secondpass:
+                    print(movement[1])
+                    if movement[0] < 0:
+                        movement[0] += player.speed
+                    elif movement[0] > 0:
+                        movement[0] -= player.speed
+                    if movement[1] < 0:
+                        movement[1] += player.speed
+                    elif movement[1] > 0:
+                        movement[1] -= player.speed
+                    rect,collisions = move(rect,movement,tile_rects,hit_types,True,True)
+                    player_death(True)
     for tile in hit_list:
         if movement[1] > 0:
             rect.bottom = tile.top
@@ -223,9 +278,8 @@ def move(rect,movement,tiles,hit_types,isplayer):
         elif movement[1] < 0:
             rect.top = tile.bottom
             collision_types['top'] = True
-    # kills player if they are touching enemy
-    if enemy_hit_list != []:
-        player_death(False)
+    
+    
     return rect, collision_types
 
 while True: # game loop
@@ -267,50 +321,8 @@ while True: # game loop
             display.blit(object_8.image, (obj.x-scroll[0],obj.y-scroll[1]))
             tile_rects.append(obj)
         
-        current_enemies_rect = []
-        for obj in current_enemies:
-            # update postition of enemies
-            # if type is enemy_bounce_x
-            if obj[0] == 22:
-                # neccesary for making the object reverse directions when hitting a wall
-                tempx = 0
-                tempx = enemy_speed_x.copy()
-                tempx[0] *= obj[2]
+        
 
-                obj[1],collisions = move(obj[1],tempx,tile_rects,hit_types,False)
-                # if the enemy hits a wall
-                if collisions["left"] or collisions["right"]:
-                    # reverse movement
-                    if obj[2] == -1:
-                        obj[2] = 1
-                    elif obj[2] == 1:
-                        obj[2] = -1
-
-
-            # if type is enemy_bounce_y
-            elif obj[0] == 23:
-                # neccesary for making the object reverse directions when hitting a wall
-                tempy = 0
-                tempy = enemy_speed_y.copy()
-                tempy[1] *= obj[2]
-
-                obj[1],collisions = move(obj[1],tempy,tile_rects,hit_types,False)
-                # if the enemy hits a wall
-                if collisions["top"] or collisions["bottom"]:
-                    # reverse movement
-                    if obj[2] == -1:
-                        obj[2] = 1
-                    elif obj[2] == 1:
-                        obj[2] = -1
-            
-            # Blit enemies wich are alive
-            exec("display.blit(object_{}.image, ({},{}))".format(obj[0],obj[1].x-scroll[0],obj[1].y-scroll[1]))
-            # update current_enemies_rect to match new enemy positions
-            current_enemies_rect.append(obj[1])
-
-            
-            
-            
         player_movement = [0,0]
         if moving_right == True:
             player_movement[0] += player.speed
@@ -321,11 +333,17 @@ while True: # game loop
         if vertical_momentum > JUMPLENGTH*-1:
             vertical_momentum = JUMPLENGTH*-1
 
-        player.rect,collisions = move(player.rect,player_movement,tile_rects,hit_types,True)
+        player.rect,collisions = move(player.rect,player_movement,tile_rects,hit_types,True,False)
         if 7 in hit_types and collisions["bottom"] == True:
             player_death(True)
-        if 23 in hit_types or 22 in hit_types:
-            player_death(True)
+        # if 23 in hit_types or 22 in hit_types:
+        #     print("AAAAAAAAAAAAAAA")
+        #     print(player_movement)
+        #     player_movement[0] *= -1
+        #     player_movement[1] *= -1
+        #     print(player_movement)
+        #     player.rect,collisions = move(player.rect,player_movement,tile_rects,hit_types,True)
+        #     player_death(True)
         
         # if player is below map
         if player.rect.y > current_map_size[1]*TILESIZE:
@@ -342,6 +360,47 @@ while True: # game loop
         # Check if player is touching flag and end level
         if 6 in hit_types:
             game_state = "new_level"
+
+
+        templist = enemy_group.sprites()
+        for obj in enemy_group:
+            # update postition of enemies
+            # if type is enemy_bounce_x
+            if obj.type == 22:
+                # neccesary for making the object reverse directions when hitting a wall
+                tempx = 0
+                tempx = enemy_speed_x.copy()
+                tempx[0] *= obj.movement_tracker
+
+                obj.rect,collisions = move(obj.rect,tempx,tile_rects,hit_types,False,False)
+                # if the enemy hits a wall
+                if collisions["left"] or collisions["right"]:
+                    # reverse movement
+                    if obj.movement_tracker == -1:
+                        obj.movement_tracker = 1
+                    elif obj.movement_tracker == 1:
+                        obj.movement_tracker = -1
+
+
+            # if type is enemy_bounce_y
+            elif obj.type == 23:
+                # neccesary for making the object reverse directions when hitting a wall
+                tempy = 0
+                tempy = enemy_speed_y.copy()
+                tempy[1] *= obj.movement_tracker
+
+                obj.rect,collisions = move(obj.rect,tempy,tile_rects,hit_types,False,False)
+                # if the enemy hits a wall
+                if collisions["top"] or collisions["bottom"]:
+                    # reverse movement
+                    if obj.movement_tracker == -1:
+                        obj.movement_tracker = 1
+                    elif obj.movement_tracker == 1:
+                        obj.movement_tracker = -1
+            
+            # Blit enemies wich are alive
+            exec("display.blit(object_{}.image, ({},{}))".format(obj.type,obj.rect.x-scroll[0],obj.rect.y-scroll[1]))
+
         
         display.blit(player.image,(player.rect.x-scroll[0],player.rect.y-scroll[1]))
 
