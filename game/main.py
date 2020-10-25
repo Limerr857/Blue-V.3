@@ -240,6 +240,7 @@ def enemy_collision_test(rect, enemies):
 
 def move(rect, movement, tiles, hit_types, isplayer, secondpass):
     global enemy_group
+    already_died = False
     collision_types = {'top': False, 'bottom': False,
                        'right': False, 'left': False}
     rect.x += movement[0]
@@ -251,23 +252,24 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
         # kills player if they are touching enemy
         if enemy_hit_list != []:
             rect.x -= movement[0]
-            if movement == [0, 0]:
-                if not secondpass:
-                    player_death(True)
-            else:
-                if not secondpass:
-                    # TODO: Delete if nothing breaks:
-                    # if movement[0] < 0:
-                    #     movement[0] += player.speed
-                    # elif movement[0] > 0:
-                    #     movement[0] -= player.speed
-                    # if movement[1] < 0:
-                    #     movement[1] += player.speed
-                    # elif movement[1] > 0:
-                    #     movement[1] -= player.speed
-                    # rect, collisions = move(
-                    #     rect, movement, tile_rects, hit_types, True, True)
-                    player_death(True)
+            # if movement == [0, 0]:
+            # if not secondpass:
+            already_died = True
+            player_death(True)
+            # else:
+            # if not secondpass:
+            # TODO: Delete if nothing breaks:
+            # if movement[0] < 0:
+            #     movement[0] += player.speed
+            # elif movement[0] > 0:
+            #     movement[0] -= player.speed
+            # if movement[1] < 0:
+            #     movement[1] += player.speed
+            # elif movement[1] > 0:
+            #     movement[1] -= player.speed
+            # rect, collisions = move(
+            #     rect, movement, tile_rects, hit_types, True, True)
+            # player_death(True)
     for tile in hit_list:
         if movement[0] > 0:
             rect.right = tile.left
@@ -287,23 +289,24 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
                 rect.y -= int(math.floor(movement[1]))
             else:
                 rect.y -= movement[1]
-            if movement == [0, 0]:
-                if not secondpass:
-                    player_death(True)
-            else:
-                if not secondpass:
-                    # TODO: Delete if nothing breaks:
-                    # if movement[0] < 0:
-                    #     movement[0] += player.speed
-                    # elif movement[0] > 0:
-                    #     movement[0] -= player.speed
-                    # if movement[1] < 0:
-                    #     movement[1] += player.speed
-                    # elif movement[1] > 0:
-                    #     movement[1] -= player.speed
-                    # rect, collisions = move(
-                    #     rect, movement, tile_rects, hit_types, True, True)
-                    player_death(True)
+            # if movement == [0, 0]:
+            #     if not secondpass:
+            if not already_died:
+                player_death(True)
+            # else:
+            #     if not secondpass:
+                # TODO: Delete if nothing breaks:
+                # if movement[0] < 0:
+                #     movement[0] += player.speed
+                # elif movement[0] > 0:
+                #     movement[0] -= player.speed
+                # if movement[1] < 0:
+                #     movement[1] += player.speed
+                # elif movement[1] > 0:
+                #     movement[1] -= player.speed
+                # rect, collisions = move(
+                #     rect, movement, tile_rects, hit_types, True, True)
+                # player_death(True)
     for tile in hit_list:
         if movement[1] > 0:
             rect.bottom = tile.top
@@ -313,6 +316,16 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
             collision_types['top'] = True
 
     return rect, collision_types
+
+
+def reset_map():
+    global player_corpses
+    global current_clone
+    global game_state
+    # restart
+    game_state = "load_level"
+    player_corpses = []
+    current_clone = []
 
 
 while True:  # game loop
@@ -471,10 +484,7 @@ while True:  # game loop
         mouse_1, mouse_2, mouse_3 = pygame.mouse.get_pressed()
         if mouse_1:
             if check_if_selected(738, 1182, 498, 580):
-                # restart
-                game_state = "load_level"
-                player_corpses = []
-                current_clone = []
+                reset_map()
         # TODO: make a game over screen with restart, quit, and quit and save
 
     else:
@@ -499,6 +509,9 @@ while True:  # game loop
             if event.key == K_k:
                 # TODO REPLACE
                 player_death(False)
+            if event.key == K_r:
+                # TODO Replace with escape menu button
+                reset_map()
         if event.type == KEYUP:
             if event.key == K_RIGHT:
                 moving_right = False

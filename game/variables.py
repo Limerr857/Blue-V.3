@@ -47,9 +47,8 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 LIGHTBLUE = (146, 244, 255)
 
+
 # every menu sprite is contained in this menu object
-
-
 class menus():
     def __init__(self):
         pass
