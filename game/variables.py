@@ -54,10 +54,20 @@ class menus():
         pass
 
     def loadall(self):
-        self.game_over_bg = img.load("img/game_over_bg.png").convert()
-        self.game_over_restart = img.load("img/go_restart.png").convert_alpha()
-        self.game_over_restart_select = img.load(
-            "img/go_restart_select.png").convert_alpha()
+        # Items in bglist must be fully rectangular with no alpha parts
+        bglist = [
+            "game_over_bg", "escape_menu_bg"
+        ]
+        # Items in itemlist must have a _select version in the /img folder
+        itemlist = [
+            "go_restart", "esc_reset", "esc_resume", "esc_quit"
+        ]
+        for name in bglist:
+            exec(f"self.{name} = img.load('img/{name}.png').convert()")
+        for name in itemlist:
+            exec(f"self.{name} = img.load('img/{name}.png').convert_alpha()")
+            exec(
+                f"self.{name}_select = img.load('img/{name}_select.png').convert_alpha()")
 
 
 menu = menus()

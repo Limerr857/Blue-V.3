@@ -333,6 +333,11 @@ while True:  # game loop
 
     if game_state == "playing":
         display.fill(LIGHTBLUE)  # clear screen by filling it with blue
+        # for event in pygame.event.get():
+        #     if event.type == KEYDOWN:
+        #         # Open menu if escape is pressed
+        #         if event.key == K_ESCAPE:
+        #             game_state = "escape_menu"
 
         true_scroll[0] += (player.rect.x-true_scroll[0]-336)/20
         true_scroll[1] += (player.rect.y-true_scroll[1]-196)/20
@@ -383,14 +388,6 @@ while True:  # game loop
             player.rect, player_movement, tile_rects, hit_types, True, False)
         if 7 in hit_types and collisions["bottom"] == True:
             player_death(True)
-        # if 23 in hit_types or 22 in hit_types:
-        #     print("AAAAAAAAAAAAAAA")
-        #     print(player_movement)
-        #     player_movement[0] *= -1
-        #     player_movement[1] *= -1
-        #     print(player_movement)
-        #     player.rect,collisions = move(player.rect,player_movement,tile_rects,hit_types,True)
-        #     player_death(True)
 
         # if player is below map
         if player.rect.y > current_map_size[1]*TILESIZE:
@@ -479,13 +476,32 @@ while True:  # game loop
 
     elif game_state == "game_over":
         win.blit(menu.game_over_bg, (0, 0))
-        blit_if_selected("game_over_restart", "menu", 738, 1182, 498, 580)
+        blit_if_selected("go_restart", "menu", 738, 1182, 498, 580)
 
         mouse_1, mouse_2, mouse_3 = pygame.mouse.get_pressed()
         if mouse_1:
             if check_if_selected(738, 1182, 498, 580):
                 reset_map()
         # TODO: make a game over screen with restart, quit, and quit and save
+
+    elif game_state == "escape_menu":
+        win.blit(menu.escape_menu_bg, (0, 0))
+        blit_if_selected("esc_reset", "menu", 668, 1251, 282, 361)
+        blit_if_selected("esc_resume", "menu", 643, 1303, 772, 851)
+        blit_if_selected("esc_quit", "menu", 630, 1290, 576, 655)
+
+        mouse_1, mouse_2, mouse_3 = pygame.mouse.get_pressed()
+        if mouse_1:
+            if check_if_selected(668, 1251, 282, 361):
+                # esc_reset is clicked on
+                reset_map()
+            if check_if_selected(643, 1303, 772, 851):
+                # esc_resume is clicked on
+                game_state = "playing"
+            if check_if_selected(630, 1290, 576, 668):
+                # esc_quit is clicked on
+                pygame.quit()
+                sys.exit()
 
     else:
         print("ERR: Invalid game_state #100")
@@ -502,10 +518,12 @@ while True:  # game loop
             if event.key == K_UP:
                 if air_timer < 6:
                     vertical_momentum = JUMPLENGTH
-            if event.key == K_ESCAPE:
-                # TODO REPLACE
+            if event.key == K_F4 and pygame.KMOD_ALT:
                 pygame.quit()
                 sys.exit()
+            if event.key == K_ESCAPE:
+                if game_state == "playing":
+                    game_state = "escape_menu"
             if event.key == K_k:
                 # TODO REPLACE
                 player_death(False)
