@@ -4,6 +4,7 @@ from variables import *
 import pickle
 from pygame.locals import *
 import pygame.image as img
+import math
 
 clock = pygame.time.Clock()
 
@@ -124,7 +125,7 @@ def loadmap(file):
             tempy = int(temp/current_map_size[0])*TILESIZE
         # If type is enemy, put in current_enemies
         if int(obj) in enemy_list:
-            #                      Enemy type             Enemy rect                    Bounce reverse factor
+            # Enemy type , Enemy rect , Bounce reverse factor
             current_enemies.append(
                 [int(obj), pygame.Rect(tempx, tempy, TILESIZE, TILESIZE), 1])
             current_enemies_rect.append(
@@ -181,6 +182,9 @@ def player_death(generate_corpse):
     print("DEAD")
 
     # if player has died with no cloning machine to clone from
+    if current_clone == []:
+        game_state = "game_over"
+        return None
     tilex = int(current_clone[0]/TILESIZE)
     tiley = int(current_clone[1]/TILESIZE)
     # if the cloning machine is empty before removing a level
@@ -197,6 +201,7 @@ def player_death(generate_corpse):
             player.rect.x, player.rect.y, TILESIZE, TILESIZE))
     player.rect.x = current_clone[0]
     player.rect.y = current_clone[1]-TILESIZE
+    # Removes one level from the clone machine
     current_map[current_map_size[0]*tiley+tilex] += 1
 
 
@@ -245,22 +250,23 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
         enemy_hit_list = enemy_collision_test(rect, enemy_group.sprites())
         # kills player if they are touching enemy
         if enemy_hit_list != []:
+            rect.x -= movement[0]
             if movement == [0, 0]:
                 if not secondpass:
                     player_death(True)
             else:
                 if not secondpass:
-                    print(movement[0])
-                    if movement[0] < 0:
-                        movement[0] += player.speed
-                    elif movement[0] > 0:
-                        movement[0] -= player.speed
-                    if movement[1] < 0:
-                        movement[1] += player.speed
-                    elif movement[1] > 0:
-                        movement[1] -= player.speed
-                    rect, collisions = move(
-                        rect, movement, tile_rects, hit_types, True, True)
+                    # TODO: Delete if nothing breaks:
+                    # if movement[0] < 0:
+                    #     movement[0] += player.speed
+                    # elif movement[0] > 0:
+                    #     movement[0] -= player.speed
+                    # if movement[1] < 0:
+                    #     movement[1] += player.speed
+                    # elif movement[1] > 0:
+                    #     movement[1] -= player.speed
+                    # rect, collisions = move(
+                    #     rect, movement, tile_rects, hit_types, True, True)
                     player_death(True)
     for tile in hit_list:
         if movement[0] > 0:
@@ -276,22 +282,27 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
         enemy_hit_list = enemy_collision_test(rect, enemy_group.sprites())
         # kills player if they are touching enemy
         if enemy_hit_list != []:
+            # Used to prevent a bug where the players corpse would be generated inside an enemy by 1 pixel
+            if movement[1] < 0:
+                rect.y -= int(math.floor(movement[1]))
+            else:
+                rect.y -= movement[1]
             if movement == [0, 0]:
                 if not secondpass:
                     player_death(True)
             else:
                 if not secondpass:
-                    print(movement[1])
-                    if movement[0] < 0:
-                        movement[0] += player.speed
-                    elif movement[0] > 0:
-                        movement[0] -= player.speed
-                    if movement[1] < 0:
-                        movement[1] += player.speed
-                    elif movement[1] > 0:
-                        movement[1] -= player.speed
-                    rect, collisions = move(
-                        rect, movement, tile_rects, hit_types, True, True)
+                    # TODO: Delete if nothing breaks:
+                    # if movement[0] < 0:
+                    #     movement[0] += player.speed
+                    # elif movement[0] > 0:
+                    #     movement[0] -= player.speed
+                    # if movement[1] < 0:
+                    #     movement[1] += player.speed
+                    # elif movement[1] > 0:
+                    #     movement[1] -= player.speed
+                    # rect, collisions = move(
+                    #     rect, movement, tile_rects, hit_types, True, True)
                     player_death(True)
     for tile in hit_list:
         if movement[1] > 0:

@@ -37,7 +37,7 @@ object_list = [
     "img_editor/clone_2.png", "img_editor/clone_3.png", "img_editor/clone_4.png", "img_editor/clone_5.png", "img_editor/clone_6.png",
     "img_editor/clone_7.png", "img_editor/clone_8.png", "img_editor/clone_9.png", "img_editor/clone_10.png", "img_editor/clone_11.png",
     "img_editor/clone_12.png", "img_editor/clone_13.png", "img_editor/enemy_bounce_x.png", "img_editor/enemy_bounce_y.png"
- 
+
 ]
 objects = [
     "cobblestone", "empty", "dirt_1", "dirt_2", "dirt_3", "player", "flag", "spike", "player_dead", "clone_1",
@@ -100,51 +100,56 @@ class _object(pygame.sprite.Sprite):
         self.location = location
         exec("{}.__init__(self)".format(objects[type]))
 
-
     def setup(self):
         self.size = self.image.get_rect().size
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
 
 
-def addobj(name,num):
+def addobj(name, num):
     exec("""class {}(_object):
         def __init__(self):
             self.image = img.load(object_list[{}]).convert_alpha()
             self.setup()
-    """.format(name,num),globals())
+    """.format(name, num), globals())
 
     if num < len(menu_slots):
-        exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,num),globals())
+        exec("{}_menu = _object({}, menu_slots[{}])".format(
+            name, num, num), globals())
     else:
         loops = int(num/len(menu_slots))
         temp = num-int(len(menu_slots)*loops)
-        exec("{}_menu = _object({}, menu_slots[{}])".format(name,num,temp),globals())
-    
+        exec("{}_menu = _object({}, menu_slots[{}])".format(
+            name, num, temp), globals())
+
     # if text is not too long to fit
     if len(name) <= 12:
-        exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(name,name),globals())
+        exec("{}_txt = fontbasic.render('{}', True, (255, 255, 255))".format(
+            name, name), globals())
     else:
-        exec("{}_txt = fontbasic_small.render('{}', True, (255, 255, 255))".format(name,name),globals())
+        exec("{}_txt = fontbasic_small.render('{}', True, (255, 255, 255))".format(
+            name, name), globals())
 
-    exec("object_{} = _object({}, (0, 0))".format(num,num),globals())
+    exec("object_{} = _object({}, (0, 0))".format(num, num), globals())
 
 
-def blitobj(name,num):
+def blitobj(name, num):
     loops = int(num/len(menu_slots))
     if menu_page == loops+1:
         # if the obj is in the current menu_page, blit it
-        exec("win.blit({}_menu.image, {}_menu.location)".format(name,name),globals())
-        exec("win.blit({}_txt, tupleadd({}_menu.location, (40, 2)))".format(name,name),globals())
+        exec("win.blit({}_menu.image, {}_menu.location)".format(
+            name, name), globals())
+        exec("win.blit({}_txt, tupleadd({}_menu.location, (40, 2)))".format(
+            name, name), globals())
     else:
         # Don't blit
         pass
 
+
 temp = 0
 for obj in objects:
-    exec("addobj('{}', {})".format(obj,temp),globals())
-    temp+=1
-
+    exec("addobj('{}', {})".format(obj, temp), globals())
+    temp += 1
 
 
 def updates_and_draw():
@@ -165,7 +170,8 @@ def updates_and_draw():
             tempx = temp*32+scroll_tracker[0]+250
             tempy = scroll_tracker[1]
         else:
-            tempx = (temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
+            tempx = (
+                temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
             tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
         try:
             exec("win.blit(object_{}.image, ({},{}))".format(
@@ -182,8 +188,8 @@ def updates_and_draw():
 
     temp = 0
     for obj in objects:
-        exec("blitobj('{}', {})".format(obj,temp),globals())
-        temp+=1
+        exec("blitobj('{}', {})".format(obj, temp), globals())
+        temp += 1
 
     if keys[pygame.K_UP]:
         scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))
