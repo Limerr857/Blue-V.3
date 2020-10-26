@@ -36,13 +36,16 @@ object_list = [
     "img_editor/player.png", "img_editor/flag.png", "img_editor/spike.png", "img_editor/player_dead.png", "img_editor/clone_1.png",
     "img_editor/clone_2.png", "img_editor/clone_3.png", "img_editor/clone_4.png", "img_editor/clone_5.png", "img_editor/clone_6.png",
     "img_editor/clone_7.png", "img_editor/clone_8.png", "img_editor/clone_9.png", "img_editor/clone_10.png", "img_editor/clone_11.png",
-    "img_editor/clone_12.png", "img_editor/clone_13.png", "img_editor/enemy_bounce_x.png", "img_editor/enemy_bounce_y.png"
+    "img_editor/clone_12.png", "img_editor/clone_13.png", "img_editor/enemy_bounce_x.png", "img_editor/enemy_bounce_y.png",
+    "img_editor/enemy_bounce_x_invert.png", "img_editor/enemy_bounce_y_invert.png", "img_editor/spike_left.png", "img_editor/spike_centre.png",
+    "img_editor/spike_right.png", "img_editor/stalactite.png"
 
 ]
 objects = [
     "cobblestone", "empty", "dirt_1", "dirt_2", "dirt_3", "player", "flag", "spike", "player_dead", "clone_1",
     "clone_2", "clone_3", "clone_4", "clone_5", "clone_6", "clone_7", "clone_8", "clone_9", "clone_10", "clone_11",
-    "clone_12", "clone_13", "enemy_bounce_x", "enemy_bounce_y"
+    "clone_12", "clone_13", "enemy_bounce_x", "enemy_bounce_y", "enemy_bounce_x_invert", "enemy_bounce_y_invert",
+    "spike_left", "spike_centre", "spike_right", "stalactite"
 ]
 
 current_map = []

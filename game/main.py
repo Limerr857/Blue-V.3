@@ -21,7 +21,7 @@ display = pygame.Surface((640, 360))  # used as the surface for rendering
 # loads all menu images
 global menu
 menu.loadall()
-
+map_danger = img.load('img/map_img/danger.png').convert_alpha()
 
 global Player
 
@@ -83,7 +83,8 @@ class _object(pygame.sprite.Sprite):
 def addobj(name, num):
     exec("""class {}(_object):
         def __init__(self):
-            self.image = img.load('img/' + object_name_list[{}] + '.png').convert_alpha()
+            self.image = img.load(
+                'img/' + object_name_list[{}] + '.png').convert_alpha()
             self.setup()
     """.format(name, num), globals())
 
@@ -328,16 +329,122 @@ def reset_map():
     current_clone = []
 
 
+def map_cycle():
+    global scroll_tracker
+    global mouse_x
+    global mouse_y
+    global temp
+    global mouse_1
+    global new_object
+    global enemy_list
+
+    win.fill(LIGHTBLUE)
+
+    temp = 0
+    for obj in current_map:
+        if current_map_size[0] > temp:
+            tempx = temp*32+scroll_tracker[0]+250
+            tempy = scroll_tracker[1]
+        else:
+            tempx = (
+                temp - current_map_size[0] * int(temp/current_map_size[0]))*32+scroll_tracker[0]+250
+            tempy = int(temp/current_map_size[0])*32+scroll_tracker[1]
+        exec("win.blit(object_{}.image, ({},{}))".format(
+            obj, tempx, tempy), globals())
+        if obj in enemy_list:
+            if obj == 22 or obj == 24:
+                # x
+                attack_list = map_subcycle(0, temp)
+            elif obj == 23 or obj == 25:
+                # y
+                attack_list = map_subcycle(1, temp)
+            for attack_position in attack_list:
+                temp1 = attack_position[1] * \
+                    current_map_size[0]+attack_position[0]
+                if current_map_size[0] > temp:
+                    tempx = temp1*32+scroll_tracker[0]+250
+                    tempy = scroll_tracker[1]
+                else:
+                    tempx = (
+                        temp1 - current_map_size[0] * int(temp1/current_map_size[0]))*32+scroll_tracker[0]+250
+                    tempy = int(temp1/current_map_size[0])*32+scroll_tracker[1]
+                win.blit(map_danger, (tempx, tempy))
+
+        temp += 1
+
+    if keys[pygame.K_UP]:
+        scroll_tracker = tupleadd(scroll_tracker, (0, scroll_vel))
+        new_object = True
+    if keys[pygame.K_DOWN]:
+        scroll_tracker = tupleadd(scroll_tracker, (0, -scroll_vel))
+        new_object = True
+    if keys[pygame.K_LEFT]:
+        scroll_tracker = tupleadd(scroll_tracker, (scroll_vel, 0))
+        new_object = True
+    if keys[pygame.K_RIGHT]:
+        scroll_tracker = tupleadd(scroll_tracker, (-scroll_vel, 0))
+        new_object = True
+
+
+def tupleadd(x, y):
+    # Adds tuples, stolen from here: https://stackoverflow.com/questions/5607284/how-to-add-with-tuples
+    # USE LIKE THIS:
+    # tupleadd((1,0),(a,b))
+    z = []
+    for i in range(len(x)):
+        z.append(x[i]+y[i])
+    return tuple(z)
+
+
+def map_subcycle(direction, position):
+    pos = [0, 0]
+    result = []
+    nothit = True
+    pos[0] = math.floor(position/current_map_size[0])
+    tempy = pos[0]
+    pos[1] = position % current_map_size[0]
+    tempx = pos[1]
+    if direction == 0:
+        # enemy moves on x-axis
+        while nothit:
+            tempx -= 1
+            if current_map[tempy*current_map_size[0]+tempx] not in collision_list:
+                result.append([tempx, tempy])
+            else:
+                nothit = False
+        tempx = pos[1]
+        nothit = True
+        while nothit:
+            tempx += 1
+            if current_map[tempy*current_map_size[0]+tempx] not in collision_list:
+                result.append([tempx, tempy])
+            else:
+                nothit = False
+    elif direction == 1:
+        # enemy moves on y-axis
+        while nothit:
+            tempy -= 1
+            if current_map[tempy*current_map_size[0]+tempx] not in collision_list:
+                result.append([tempx, tempy])
+            else:
+                nothit = False
+        tempy = pos[0]
+        nothit = True
+        while nothit:
+            tempy += 1
+            if current_map[tempy*current_map_size[0]+tempx] not in collision_list:
+                result.append([tempx, tempy])
+            else:
+                nothit = False
+    return result
+
+
 while True:  # game loop
     mouse_x, mouse_y = pygame.mouse.get_pos()
+    keys = pygame.key.get_pressed()
 
     if game_state == "playing":
         display.fill(LIGHTBLUE)  # clear screen by filling it with blue
-        # for event in pygame.event.get():
-        #     if event.type == KEYDOWN:
-        #         # Open menu if escape is pressed
-        #         if event.key == K_ESCAPE:
-        #             game_state = "escape_menu"
 
         true_scroll[0] += (player.rect.x-true_scroll[0]-336)/20
         true_scroll[1] += (player.rect.y-true_scroll[1]-196)/20
@@ -386,7 +493,14 @@ while True:  # game loop
 
         player.rect, collisions = move(
             player.rect, player_movement, tile_rects, hit_types, True, False)
+        # If player hits a spike
         if 7 in hit_types and collisions["bottom"] == True:
+            player_death(True)
+        if 26 in hit_types and collisions["bottom"] == True:
+            player_death(True)
+        if 27 in hit_types and collisions["bottom"] == True:
+            player_death(True)
+        if 28 in hit_types and collisions["bottom"] == True:
             player_death(True)
 
         # if player is below map
@@ -407,7 +521,7 @@ while True:  # game loop
 
         templist = enemy_group.sprites()
         for obj in enemy_group:
-            # update postition of enemies
+            # update position of enemies
             # if type is enemy_bounce_x
             if obj.type == 22:
                 # neccesary for making the object reverse directions when hitting a wall
@@ -430,6 +544,40 @@ while True:  # game loop
                 # neccesary for making the object reverse directions when hitting a wall
                 tempy = 0
                 tempy = enemy_speed_y.copy()
+                tempy[1] *= obj.movement_tracker
+
+                obj.rect, collisions = move(
+                    obj.rect, tempy, tile_rects, hit_types, False, False)
+                # if the enemy hits a wall
+                if collisions["top"] or collisions["bottom"]:
+                    # reverse movement
+                    if obj.movement_tracker == -1:
+                        obj.movement_tracker = 1
+                    elif obj.movement_tracker == 1:
+                        obj.movement_tracker = -1
+
+            # if type is enemy_bounce_x_invert
+            elif obj.type == 24:
+                # neccesary for making the object reverse directions when hitting a wall
+                tempx = 0
+                tempx = enemy_speed_x_invert.copy()
+                tempx[0] *= obj.movement_tracker
+
+                obj.rect, collisions = move(
+                    obj.rect, tempx, tile_rects, hit_types, False, False)
+                # if the enemy hits a wall
+                if collisions["left"] or collisions["right"]:
+                    # reverse movement
+                    if obj.movement_tracker == -1:
+                        obj.movement_tracker = 1
+                    elif obj.movement_tracker == 1:
+                        obj.movement_tracker = -1
+
+            # if type is enemy_bounce_y_invert
+            elif obj.type == 25:
+                # neccesary for making the object reverse directions when hitting a wall
+                tempy = 0
+                tempy = enemy_speed_y_invert.copy()
                 tempy[1] *= obj.movement_tracker
 
                 obj.rect, collisions = move(
@@ -503,6 +651,10 @@ while True:  # game loop
                 pygame.quit()
                 sys.exit()
 
+    elif game_state == "map":
+        map_cycle()
+        win.blit(menu.map_instructions, (0, 1021))
+
     else:
         print("ERR: Invalid game_state #100")
 
@@ -525,11 +677,13 @@ while True:  # game loop
                 if game_state == "playing":
                     game_state = "escape_menu"
             if event.key == K_k:
-                # TODO REPLACE
+                # TODO Remove
                 player_death(False)
-            if event.key == K_r:
-                # TODO Replace with escape menu button
-                reset_map()
+            if event.key == K_m:
+                if game_state == "playing":
+                    game_state = "map"
+                elif game_state == "map":
+                    game_state = "playing"
         if event.type == KEYUP:
             if event.key == K_RIGHT:
                 moving_right = False
