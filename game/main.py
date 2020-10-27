@@ -180,7 +180,15 @@ def player_death(generate_corpse):
     global TILESIZE
     global current_clone
     global game_state
-    print("DEAD")
+    global air_timer
+    global vertical_momentum
+    global moving_right
+    global moving_left
+
+    air_timer = 0
+    vertical_momentum = 0
+    moving_right = False
+    moving_left = False
 
     # if player has died with no cloning machine to clone from
     if current_clone == []:
@@ -200,8 +208,13 @@ def player_death(generate_corpse):
     if generate_corpse:
         player_corpses.append(pygame.Rect(
             player.rect.x, player.rect.y, TILESIZE, TILESIZE))
+    print("DEAD")
+    print(player.rect.x)
+    print(player.rect.y)
     player.rect.x = current_clone[0]
     player.rect.y = current_clone[1]-TILESIZE
+    print(player.rect.x)
+    print(player.rect.y)
     # Removes one level from the clone machine
     current_map[current_map_size[0]*tiley+tilex] += 1
 
@@ -226,7 +239,9 @@ def check_if_selected(x_start, x_end, y_start, y_end):
 def collision_test(rect, tiles):
     hit_list = []
     for tile in tiles:
-        if rect.colliderect(tile):
+        # Adds tile to hit_list if rect is colliding with it unless they are the same,
+        # basically stops things from colliding with themselves
+        if rect.colliderect(tile) and tile != rect:
             hit_list.append(tile)
     return hit_list
 
@@ -271,13 +286,14 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
             # rect, collisions = move(
             #     rect, movement, tile_rects, hit_types, True, True)
             # player_death(True)
-    for tile in hit_list:
-        if movement[0] > 0:
-            rect.right = tile.left
-            collision_types['right'] = True
-        elif movement[0] < 0:
-            rect.left = tile.right
-            collision_types['left'] = True
+    if not already_died:
+        for tile in hit_list:
+            if movement[0] > 0:
+                rect.right = tile.left
+                collision_types['right'] = True
+            elif movement[0] < 0:
+                rect.left = tile.right
+                collision_types['left'] = True
     rect.y += movement[1]
     hit_list = collision_test(rect, tiles)
     if isplayer:
@@ -308,13 +324,14 @@ def move(rect, movement, tiles, hit_types, isplayer, secondpass):
                 # rect, collisions = move(
                 #     rect, movement, tile_rects, hit_types, True, True)
                 # player_death(True)
-    for tile in hit_list:
-        if movement[1] > 0:
-            rect.bottom = tile.top
-            collision_types['bottom'] = True
-        elif movement[1] < 0:
-            rect.top = tile.bottom
-            collision_types['top'] = True
+    if not already_died:
+        for tile in hit_list:
+            if movement[1] > 0:
+                rect.bottom = tile.top
+                collision_types['bottom'] = True
+            elif movement[1] < 0:
+                rect.top = tile.bottom
+                collision_types['top'] = True
 
     return rect, collision_types
 
@@ -338,6 +355,8 @@ def map_cycle():
     global new_object
     global enemy_list
 
+    blit_tracker = []
+
     win.fill(LIGHTBLUE)
 
     temp = 0
@@ -358,6 +377,11 @@ def map_cycle():
             elif obj == 23 or obj == 25:
                 # y
                 attack_list = map_subcycle(1, temp)
+            # # Removes duplicates from the list
+            # temp2 = []
+            # [temp2.append(x) for x in attack_list if x not in temp2]
+            # attack_list = temp2
+            # TODO: REMOVE THIS
             for attack_position in attack_list:
                 temp1 = attack_position[1] * \
                     current_map_size[0]+attack_position[0]
@@ -368,7 +392,13 @@ def map_cycle():
                     tempx = (
                         temp1 - current_map_size[0] * int(temp1/current_map_size[0]))*32+scroll_tracker[0]+250
                     tempy = int(temp1/current_map_size[0])*32+scroll_tracker[1]
-                win.blit(map_danger, (tempx, tempy))
+                # Stops it from blitting two map_danger in the same place
+                temp3 = [tempx, tempy]
+                if temp3 not in blit_tracker:
+                    # Stops it from blitting a map_danger over an enemy sprite
+                    if current_map[temp1] not in enemy_list:
+                        win.blit(map_danger, (tempx, tempy))
+                        blit_tracker.append([tempx, tempy])
 
         temp += 1
 
@@ -480,6 +510,10 @@ while True:  # game loop
         for obj in player_corpses:
             display.blit(object_8.image, (obj.x-scroll[0], obj.y-scroll[1]))
             tile_rects.append(obj)
+
+        # Add all enemies to the collision rect list so that they can collide with each other
+        for obj in enemy_group:
+            tile_rects.append(obj.rect)
 
         player_movement = [0, 0]
         if moving_right == True:
@@ -668,14 +702,17 @@ while True:  # game loop
             if event.key == K_LEFT:
                 moving_left = True
             if event.key == K_UP:
-                if air_timer < 6:
-                    vertical_momentum = JUMPLENGTH
+                if game_state == "playing":
+                    if air_timer < 6:
+                        vertical_momentum = JUMPLENGTH
             if event.key == K_F4 and pygame.KMOD_ALT:
                 pygame.quit()
                 sys.exit()
             if event.key == K_ESCAPE:
                 if game_state == "playing":
                     game_state = "escape_menu"
+                elif game_state == "escape_menu":
+                    game_state = "playing"
             if event.key == K_k:
                 # TODO Remove
                 player_death(False)
